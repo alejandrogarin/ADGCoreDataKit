@@ -32,6 +32,8 @@ import CoreData
 public class CoreDataAccessImpl: CoreDataAccess {
     
     private let coreDataContext: CoreDataContext
+
+    public let CORE_DATA_OBJECT_ID = "_core_data_object_id"
     
     public var coreDataContextDelegate: CoreDataContextDelegate? {
         get {
@@ -48,7 +50,7 @@ public class CoreDataAccessImpl: CoreDataAccess {
     
     private func createError(#code: Int, failureReason: String) -> NSError {
         let dict:[String:String] = [NSLocalizedFailureReasonErrorKey:failureReason]
-        return  NSError(domain: "DATA_ACCESS_BASE_IMPL", code: code, userInfo: dict)
+        return  NSError(domain: "CORE_DATA_ACCESS_IMPL", code: code, userInfo: dict)
     }
     
     private func parseEntityName(var entityName: String) -> String {
@@ -105,19 +107,23 @@ public class CoreDataAccessImpl: CoreDataAccess {
     }
     
     public func findObjectsByEntity<T>(entityName: String) -> [T] {
-        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: nil, predicate: nil, page: nil, pageCount: nil, error: nil)
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: nil, predicate: nil, page: nil, pageSize: nil, error: nil)
+    }
+    
+    public func findObjectsByEntity<T>(entityName: String, predicate: NSPredicate) -> [T] {
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: nil, predicate: predicate, page: nil, pageSize: nil, error: nil)
     }
     
     public func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String) -> [T] {
-        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: nil, pageCount: nil, error: nil)
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: nil, pageSize: nil, error: nil)
     }
     
     public func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, predicate: NSPredicate) -> [T] {
-        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: nil, pageCount: nil, error: nil)
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: nil, pageSize: nil, error: nil)
     }
     
-    public func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, page: Int, pageCount: Int) -> [T] {
-        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: page, pageCount: pageCount, error: nil)
+    public func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, page: Int, pageSize: Int) -> [T] {
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: page, pageSize: pageSize, error: nil)
     }
 
     public func findObjectsByEntity<T>() -> [T] {
@@ -130,9 +136,19 @@ public class CoreDataAccessImpl: CoreDataAccess {
         return self.findObjectsByEntity(entityName, withSortKey: sortKey)
     }
     
+    public func findObjectsByEntity<T>(#predicate: NSPredicate) -> [T] {
+        let entityName = self.parseEntityName(toString(T.self))
+        return self.findObjectsByEntity(entityName, predicate: predicate)
+    }
+    
     public func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate) -> [T] {
         let entityName = self.parseEntityName(toString(T.self))
         return self.findObjectsByEntity(entityName, withSortKey: sortKey, predicate: predicate)
+    }
+    
+    public func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate, page: Int, pageSize: Int) -> [T] {
+        let entityName = self.parseEntityName(toString(T.self))
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize, error: nil)
     }
     
     public func findObjectByManagedObjectId<T>(#moId: NSManagedObjectID) ->T? {
@@ -169,7 +185,7 @@ public class CoreDataAccessImpl: CoreDataAccess {
         let expressionValue = NSExpression(forConstantValue: value)
         let predicate = NSComparisonPredicate(leftExpression: expressionKey, rightExpression: expressionValue, modifier: .DirectPredicateModifier, type: .EqualToPredicateOperatorType, options: .CaseInsensitivePredicateOption)
         
-        let result: [T] = self.coreDataContext.findObjectsByEntity(entityName, sortKey: nil, predicate: predicate, page: nil, pageCount: nil, error: nil)
+        let result: [T] = self.coreDataContext.findObjectsByEntity(entityName, sortKey: nil, predicate: predicate, page: nil, pageSize: nil, error: nil)
         
         return result.first
     }
@@ -185,6 +201,29 @@ public class CoreDataAccessImpl: CoreDataAccess {
         let absURL = url.absoluteString
         return absURL;
     }
+
+    public func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
+        var result:[[String:Any]] = []
+        for object in managedObjects {
+            var dtoMap: [String: Any] = [:]
+            for key in keys {
+                if let value:AnyObject = object.valueForKey(key) {
+                    dtoMap[key] = value
+                }
+            }
+            dtoMap[CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
+            result.append(dtoMap)
+        }
+        return result
+    }
+    
+    public func managedObjectToDictionary(managedObject: NSManagedObject, keys:[String]) -> [String:Any] {
+        if let result = self.managedObjectsToDictionary([managedObject], keys: keys).first {
+            return result
+        } else {
+            return [:]
+        }
+    }
     
     public func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
         
@@ -197,7 +236,7 @@ public class CoreDataAccessImpl: CoreDataAccess {
                     dtoMap[convertedKey] = value
                 }
             }
-            dtoMap["_core_data_object_id"] = self.stringObjectId(fromMO: object)
+            dtoMap[CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result

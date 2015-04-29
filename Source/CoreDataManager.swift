@@ -28,7 +28,7 @@
 
 import CoreData
 
-public class CoreDataManager: NSObject {
+public class CoreDataManager {
 
     private var storeCoordinator : NSPersistentStoreCoordinator?
     
@@ -48,7 +48,6 @@ public class CoreDataManager: NSObject {
         self.appGroup = appGroup;
         self.icloud = false;
         self.bundle = bundle;
-        super.init();
         
         storeCoordinator = self.createPersistentStoreCoordinator(error);
         if (storeCoordinator == nil) {
@@ -95,7 +94,7 @@ public class CoreDataManager: NSObject {
             return NSManagedObjectModel(contentsOfURL: url);
         } else {
             if (error != nil) {
-                error.memory = createCoreDataError(code:9999, failureReason: "Could not find the path for your data model: \(self.modelName)");
+                error.memory = createCoreDataError(code: 100, failureReason: "Could not find the path for your data model: \(self.modelName)");
             }
             return nil;
         }
@@ -108,7 +107,7 @@ public class CoreDataManager: NSObject {
         
         if (storeURL == nil) {
             if (error != nil) {
-                error.memory = createCoreDataError(code:9998, failureReason: "Cannot create an SQL store with a nil URL.");
+                error.memory = createCoreDataError(code: 101, failureReason: "Cannot create an SQL store with a nil URL.");
             }
             return nil;
         }

@@ -97,7 +97,7 @@ class RowTests: BaseTestCase {
         for (var i:Int = 0; i < 100; i++) {
             self.insertPlaylist("play \(i)", order: i)
         }
-        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: nil, page: nil, pageCount: nil, error: nil)
+        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: nil, page: nil, pageSize: nil, error: nil)
         XCTAssertEqual(array.count, 100)
     }
     
@@ -106,7 +106,7 @@ class RowTests: BaseTestCase {
             self.insertPlaylist("play \(i)", order: i)
         }
         let predicate = NSPredicate(format: "name CONTAINS %@", "play 2")
-        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: predicate, page: nil, pageCount: nil, error: nil)
+        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: predicate, page: nil, pageSize: nil, error: nil)
         XCTAssertEqual(array.count, 11)
     }
     
@@ -114,10 +114,10 @@ class RowTests: BaseTestCase {
         for (var i:Int = 0; i < 100; i++) {
             self.insertPlaylist("play \(i)", order: i)
         }
-        let arrayPage0: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 0, pageCount: 10, error: nil)
-        let arrayPage1: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 1, pageCount: 10, error: nil)
-        let arrayPage9: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 9, pageCount: 10, error: nil)
-        let arrayPage10: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 10, pageCount: 10, error: nil)
+        let arrayPage0: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 0, pageSize: 10, error: nil)
+        let arrayPage1: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 1, pageSize: 10, error: nil)
+        let arrayPage9: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 9, pageSize: 10, error: nil)
+        let arrayPage10: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 10, pageSize: 10, error: nil)
         XCTAssertEqual(arrayPage0.count, 10)
         XCTAssertEqual(arrayPage1.count, 10)
         XCTAssertEqual(arrayPage9.count, 10)

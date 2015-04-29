@@ -44,17 +44,22 @@ public protocol CoreDataAccess {
     func findObjectByEntity<T>(entityName: String, withKey key: String, andValue value: String) -> T?
 
     func findObjectsByEntity<T>() -> [T]
+    func findObjectsByEntity<T>(#predicate: NSPredicate) -> [T];    
     func findObjectsByEntity<T>(#sortKey: String) -> [T];
     func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate) -> [T]
+    func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate, page: Int, pageSize: Int) -> [T]
 
     func findObjectsByEntity<T>(entityName: String) -> [T]
+    func findObjectsByEntity<T>(entityName: String, predicate: NSPredicate) -> [T];
     func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String) -> [T]
-    func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, page: Int, pageCount: Int) -> [T]
+    func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, page: Int, pageSize: Int) -> [T]
     func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, predicate: NSPredicate) -> [T]
     
     func delete(#objectId: String) -> Bool
     func delete(#object: NSManagedObject) -> Bool
     func stringObjectId(fromMO mo : NSManagedObject) -> String?
+    func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]]
     func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]]
+    func managedObjectToDictionary(managedObject: NSManagedObject, keys:[String]) -> [String:Any]
     func managedObjectToDictionary(managedObject: NSManagedObject) -> [String:Any]    
 }

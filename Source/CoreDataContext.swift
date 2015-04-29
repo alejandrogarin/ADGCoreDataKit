@@ -69,7 +69,7 @@ public class CoreDataContext: NSObject {
         return objectContext.objectWithID(objectId) as! T;
     }
 
-    func findObjectsByEntity<T>(entityName : String, sortKey: String?, predicate: NSPredicate?, var page: Int?, pageCount: Int?, error: NSErrorPointer) -> [T] {
+    func findObjectsByEntity<T>(entityName : String, sortKey: String?, predicate: NSPredicate?, var page: Int?, pageSize: Int?, error: NSErrorPointer) -> [T] {
         let all = NSFetchRequest()
         if let sortKey = sortKey {
             all.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: true)]
@@ -78,9 +78,9 @@ public class CoreDataContext: NSObject {
             all.predicate = predicate
         }
         all.entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: self.objectContext)
-        if let page = page, pageCount = pageCount {
-            all.fetchLimit = pageCount;
-            all.fetchOffset = page * pageCount
+        if let page = page, pageSize = pageSize {
+            all.fetchLimit = pageSize;
+            all.fetchOffset = page * pageSize
         }
         let list: [AnyObject]? = objectContext.executeFetchRequest(all, error: error)
         if let actualList = list {
