@@ -46,6 +46,7 @@ public protocol CoreDataAccess {
     func findObjectsByEntity<T>() -> [T]
     func findObjectsByEntity<T>(#predicate: NSPredicate) -> [T];    
     func findObjectsByEntity<T>(#sortKey: String) -> [T];
+    func findObjectsByEntity<T>(#sortKey: String, page: Int, pageSize: Int) -> [T];
     func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate) -> [T]
     func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate, page: Int, pageSize: Int) -> [T]
 

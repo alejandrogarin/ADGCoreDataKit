@@ -146,6 +146,11 @@ public class CoreDataAccessImpl: CoreDataAccess {
         return self.findObjectsByEntity(entityName, withSortKey: sortKey, predicate: predicate)
     }
     
+    public func findObjectsByEntity<T>(#sortKey: String, page: Int, pageSize: Int) -> [T] {
+        let entityName = self.parseEntityName(toString(T.self))
+        return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: page, pageSize: pageSize, error: nil)
+    }
+    
     public func findObjectsByEntity<T>(#sortKey: String, predicate: NSPredicate, page: Int, pageSize: Int) -> [T] {
         let entityName = self.parseEntityName(toString(T.self))
         return self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize, error: nil)
