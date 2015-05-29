@@ -26,6 +26,7 @@ class ViewController: UITableViewController {
         
         println("----- create the core class ----")
         let coreData = CoreDataManager(usingModelName: "Model", error: nil)
+        
         if let coreData = coreData {
             println("----- create the data access wrapper  ----")
             let coreDataAccess = CoreDataAccessImpl(usingCoreDataManager: coreData, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
@@ -34,13 +35,11 @@ class ViewController: UITableViewController {
             for (var i=0; i < 10; i++) {
                 let mo:NSManagedObject? = coreDataAccess.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i], error: nil)
             }
-            println("----- get the array of managed object ----")
+            println("----- get the array of managed objects ----")
             let result:[NSManagedObject] = coreDataAccess.findObjectsByEntity("TableA")
-            println(result)
             
             println("----- create an array of dictionary elements representing the retrieved managed objects ----")
             self.datasource = coreDataAccess.managedObjectsToDictionary(result)
-            println(self.datasource)
             
             self.tableView.reloadData()
         }
