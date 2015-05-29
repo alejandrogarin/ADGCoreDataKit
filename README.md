@@ -4,17 +4,18 @@ A set of classes for easy to use CoreData
 
 ## Examples
 
-### 1. Insert values into a CoreData Entity and populate a UITableViewController
+#### 1. Insert values into a CoreData Entity and populate a UITableViewController
 
 Given this model
 
-(Model.png)
+![Example1](Model.png)
 
 This is the minimum amount of code to show the rows inserted in a table. This example doesn't need any NSManagedObject subclass
 
 ```swift
 
 import UIKit
+import CoreData
 
 class ViewController: UITableViewController {
 
