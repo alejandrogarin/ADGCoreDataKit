@@ -56,6 +56,7 @@ public protocol CoreDataAccess {
     func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, page: Int, pageSize: Int) -> [T]
     func findObjectsByEntity<T>(entityName: String, withSortKey sortKey: String, predicate: NSPredicate) -> [T]
     
+    func truncate(entityName: String) -> Bool
     func delete(#objectId: String) -> Bool
     func delete(#object: NSManagedObject) -> Bool
     func stringObjectId(fromMO mo : NSManagedObject) -> String?

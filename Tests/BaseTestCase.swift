@@ -46,15 +46,18 @@ class BaseTestCase: XCTestCase {
     
     override func tearDown() {
         super.tearDown()
-        
-        let playlists:[Playlist] = self.dataAccess.findObjectsByEntity()
-        for (var i = 0; i < playlists.count; i++) {
-            self.dataAccess.delete(object: playlists[i])
-        }
-        let audios:[Audio] = self.dataAccess.findObjectsByEntity()
-        for (var i = 0; i < audios.count; i++) {
-            self.dataAccess.delete(object: audios[i])
-        }
+
+        self.dataAccess.truncate("Playlist")
+        self.dataAccess.truncate("Audio")
+    }
+    
+    func testTruncate() {
+        self.insertPlaylist("test");
+        let count: Int = (self.dataAccess.findObjectsByEntity("Playlist") as [NSManagedObject]).count;
+        XCTAssertEqual(count, 1);
+        self.dataAccess.truncate("Playlist");
+        let countAfterTruncate: Int = (self.dataAccess.findObjectsByEntity("Playlist") as [NSManagedObject]).count;
+        XCTAssertEqual(countAfterTruncate, 0);
     }
 
     func insertPlaylist(name: String) -> Playlist {

@@ -185,6 +185,15 @@ public class CoreDataAccessImpl: CoreDataAccess {
         return resultSave
     }
     
+    public func truncate(entityName: String) -> Bool {
+        let objects: [NSManagedObject] = self.findObjectsByEntity(entityName)
+        for mo in objects {
+            self.coreDataContext.deleteObject(mo)
+        }
+        let resultSave = coreDataContext.saveContext()
+        return resultSave;
+    }
+    
     public func findObjectByEntity<T>(entityName: String, withKey key: String, andValue value: String) -> T? {
         let expressionKey = NSExpression(forKeyPath: key)
         let expressionValue = NSExpression(forConstantValue: value)
