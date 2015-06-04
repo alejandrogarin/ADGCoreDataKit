@@ -29,6 +29,10 @@
 import Foundation
 import CoreData
 
+struct CoreDataAccessConstants {
+    static let CORE_DATA_OBJECT_ID = "_core_data_object_id"
+}
+
 public protocol CoreDataAccess {
     
     var coreDataContextDelegate: CoreDataContextDelegate? {get set}

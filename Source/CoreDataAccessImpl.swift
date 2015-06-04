@@ -32,8 +32,6 @@ import CoreData
 public class CoreDataAccessImpl: CoreDataAccess {
     
     private let coreDataContext: CoreDataContext
-
-    public let CORE_DATA_OBJECT_ID = "_core_data_object_id"
     
     public var coreDataContextDelegate: CoreDataContextDelegate? {
         get {
@@ -225,7 +223,7 @@ public class CoreDataAccessImpl: CoreDataAccess {
                     dtoMap[key] = value
                 }
             }
-            dtoMap[CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
+            dtoMap[CoreDataAccessConstants.CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result
@@ -250,7 +248,7 @@ public class CoreDataAccessImpl: CoreDataAccess {
                     dtoMap[convertedKey] = value
                 }
             }
-            dtoMap[CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
+            dtoMap[CoreDataAccessConstants.CORE_DATA_OBJECT_ID] = self.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result
