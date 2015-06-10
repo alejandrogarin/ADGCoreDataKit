@@ -28,7 +28,7 @@
 
 import CoreData
 
-public protocol CoreDataManagerDelegate {
+public protocol CoreDataManagerDelegate: class {
     func coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification: NSNotification)
     func coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(transition: NSPersistentStoreUbiquitousTransitionType)
     func coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(transition: NSPersistentStoreUbiquitousTransitionType)
@@ -45,7 +45,7 @@ public class CoreDataManager: NSObject {
 
     var objectModel : NSManagedObjectModel?
     
-    public var delegate : CoreDataManagerDelegate?
+    public weak var delegate : CoreDataManagerDelegate?
 
     public var persistentStoreCoordinator : NSPersistentStoreCoordinator {
         return self.storeCoordinator!

@@ -35,7 +35,7 @@ struct CoreDataAccessConstants {
 
 public protocol CoreDataAccess {
     
-    var coreDataContextDelegate: CoreDataContextDelegate? {get set}
+    weak var coreDataContextDelegate: CoreDataContextDelegate? {get set}
 
     func insert<T>(#entityName: String, map: [String: AnyObject], error: NSErrorPointer) ->T?
     func insert<T>(#map: [String: AnyObject], error: NSErrorPointer) ->T?

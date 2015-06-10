@@ -29,7 +29,7 @@
 import Foundation
 import CoreData
 
-public protocol CoreDataContextDelegate {
+public protocol CoreDataContextDelegate: class {
     func coreDataContextObjectsDidChangeNotification(notification: NSNotification)
     func coreDataContextObjectContextDidSaveNotification(notification: NSNotification)
 }
