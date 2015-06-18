@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0630"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6991BE031AEEB7FF001C89FC"
-               BuildableName = "ADGCoreDataKit.framework"
-               BlueprintName = "ADGCoreDataKit"
-               ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+               BlueprintIdentifier = "69E27F6A1B0CFD4000C7E091"
+               BuildableName = "CoreDataKitExample.app"
+               BlueprintName = "CoreDataKitExample"
+               ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -28,10 +28,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6991BE0E1AEEB7FF001C89FC"
-               BuildableName = "ADGCoreDataKitTests.xctest"
-               BlueprintName = "ADGCoreDataKitTests"
-               ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+               BlueprintIdentifier = "69E27F7F1B0CFD4000C7E091"
+               BuildableName = "CoreDataKitExampleTests.xctest"
+               BlueprintName = "CoreDataKitExampleTests"
+               ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,24 +46,22 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6991BE0E1AEEB7FF001C89FC"
-               BuildableName = "ADGCoreDataKitTests.xctest"
-               BlueprintName = "ADGCoreDataKitTests"
-               ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+               BlueprintIdentifier = "69E27F7F1B0CFD4000C7E091"
+               BuildableName = "CoreDataKitExampleTests.xctest"
+               BlueprintName = "CoreDataKitExampleTests"
+               ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6991BE031AEEB7FF001C89FC"
-            BuildableName = "ADGCoreDataKit.framework"
-            BlueprintName = "ADGCoreDataKit"
-            ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+            BlueprintIdentifier = "69E27F6A1B0CFD4000C7E091"
+            BuildableName = "CoreDataKitExample.app"
+            BlueprintName = "CoreDataKitExample"
+            ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -73,17 +71,17 @@
       buildConfiguration = "Debug"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
-      debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6991BE031AEEB7FF001C89FC"
-            BuildableName = "ADGCoreDataKit.framework"
-            BlueprintName = "ADGCoreDataKit"
-            ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+            BlueprintIdentifier = "69E27F6A1B0CFD4000C7E091"
+            BuildableName = "CoreDataKitExample.app"
+            BlueprintName = "CoreDataKitExample"
+            ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -93,15 +91,16 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6991BE031AEEB7FF001C89FC"
-            BuildableName = "ADGCoreDataKit.framework"
-            BlueprintName = "ADGCoreDataKit"
-            ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+            BlueprintIdentifier = "69E27F6A1B0CFD4000C7E091"
+            BuildableName = "CoreDataKitExample.app"
+            BlueprintName = "CoreDataKitExample"
+            ReferencedContainer = "container:CoreDataKitExample.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

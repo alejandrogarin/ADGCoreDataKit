@@ -65,11 +65,11 @@ public class CoreDataContext: NSObject {
         self.delegate?.coreDataContextObjectsDidChangeNotification(notification)
     }
     
-    func findObjectById<T>(objectId: NSManagedObjectID) -> T {
-        return objectContext.objectWithID(objectId) as! T;
+    func findObjectById(objectId: NSManagedObjectID) throws -> NSManagedObject {
+        return objectContext.objectWithID(objectId)
     }
 
-    func findObjectsByEntity<T>(entityName : String, sortKey: String?, predicate: NSPredicate?, var page: Int?, pageSize: Int?, error: NSErrorPointer) -> [T] {
+    func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
         let all = NSFetchRequest()
         if let sortKey = sortKey {
             all.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: true)]
@@ -82,48 +82,36 @@ public class CoreDataContext: NSObject {
             all.fetchLimit = pageSize;
             all.fetchOffset = page * pageSize
         }
-        let list: [AnyObject]? = objectContext.executeFetchRequest(all, error: error)
-        if let actualList = list {
-            var newArray : [T] = []
-            for anyObject in actualList {
-                if (anyObject is T) {
-                    newArray.append(anyObject as! T)
-                }
-            }
-            return newArray
-        } else {
-            return []
-        }
+        return try objectContext.executeFetchRequest(all)
     }
     
-    func insertObjectForEntity<T>(entityName : String) -> T? {
-        let anyObject: AnyObject = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
-        return anyObject as? T
+    func insertObjectForEntity(entityName : String) -> NSManagedObject {
+        return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
     }
     
     func deleteObject(byObjectId objectId: String) -> Bool {
-        let url : NSURL? = NSURL(string: objectId)
-        if (url != nil) {
-            let objectId: NSManagedObjectID? = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url!)
-            if let actualObjectId = objectId {
-                let managedObject: NSManagedObject = self.findObjectById(actualObjectId)
-                self.deleteObject(managedObject)
-                return true
-            }
+        
+        guard let url = NSURL(string: objectId) else {
+            return false
         }
-        return false;
+        
+        guard let objectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
+            return false
+        }
+        
+        do {
+            try self.deleteObject(self.findObjectById(objectId))
+            return true
+        } catch {
+            return false
+        }
     }
     
     func deleteObject(managedObject : NSManagedObject) -> Void {
         objectContext.deleteObject(managedObject);
     }
     
-    func saveContext () -> Bool {
-        return objectContext.hasChanges && objectContext.save(nil);
+    func saveContext () throws {
+        try objectContext.save()
     }
-    
-    func saveContext (error: NSErrorPointer) -> Bool {
-        return objectContext.hasChanges && objectContext.save(error);
-    }
-
 }

@@ -7,9 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6991BE291AEEB87D001C89FC /* CoreDataAccessImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE241AEEB87D001C89FC /* CoreDataAccessImpl.swift */; };
+		6991BE291AEEB87D001C89FC /* CoreDataAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE241AEEB87D001C89FC /* CoreDataAccess.swift */; };
 		6991BE2B1AEEB87D001C89FC /* CoreDataContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE251AEEB87D001C89FC /* CoreDataContext.swift */; };
-		6991BE2D1AEEB87D001C89FC /* CoreDataAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE261AEEB87D001C89FC /* CoreDataAccess.swift */; };
 		6991BE2F1AEEB87D001C89FC /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE271AEEB87D001C89FC /* CoreDataManager.swift */; };
 		6991BE371AEEB891001C89FC /* BaseTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE301AEEB891001C89FC /* BaseTestCase.swift */; };
 		6991BE381AEEB891001C89FC /* RawTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6991BE311AEEB891001C89FC /* RawTests.swift */; };
@@ -22,9 +21,8 @@
 /* Begin PBXFileReference section */
 		6991BE0F1AEEB7FF001C89FC /* ADGCoreDataKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ADGCoreDataKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6991BE151AEEB7FF001C89FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6991BE241AEEB87D001C89FC /* CoreDataAccessImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataAccessImpl.swift; path = ../Source/CoreDataAccessImpl.swift; sourceTree = "<group>"; };
+		6991BE241AEEB87D001C89FC /* CoreDataAccess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataAccess.swift; path = ../Source/CoreDataAccess.swift; sourceTree = "<group>"; };
 		6991BE251AEEB87D001C89FC /* CoreDataContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataContext.swift; path = ../Source/CoreDataContext.swift; sourceTree = "<group>"; };
-		6991BE261AEEB87D001C89FC /* CoreDataAccess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataAccess.swift; path = ../Source/CoreDataAccess.swift; sourceTree = "<group>"; };
 		6991BE271AEEB87D001C89FC /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataManager.swift; path = ../Source/CoreDataManager.swift; sourceTree = "<group>"; };
 		6991BE301AEEB891001C89FC /* BaseTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BaseTestCase.swift; path = ../../Tests/BaseTestCase.swift; sourceTree = "<group>"; };
 		6991BE311AEEB891001C89FC /* RawTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RawTests.swift; path = ../../Tests/RawTests.swift; sourceTree = "<group>"; };
@@ -87,8 +85,7 @@
 		6991BE231AEEB85C001C89FC /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				6991BE241AEEB87D001C89FC /* CoreDataAccessImpl.swift */,
-				6991BE261AEEB87D001C89FC /* CoreDataAccess.swift */,
+				6991BE241AEEB87D001C89FC /* CoreDataAccess.swift */,
 				6991BE251AEEB87D001C89FC /* CoreDataContext.swift */,
 				6991BE271AEEB87D001C89FC /* CoreDataManager.swift */,
 			);
@@ -121,7 +118,8 @@
 		6991BDFB1AEEB7FF001C89FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0630;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = ADG;
 				TargetAttributes = {
 					6991BE0E1AEEB7FF001C89FC = {
@@ -164,11 +162,10 @@
 				6991BE2B1AEEB87D001C89FC /* CoreDataContext.swift in Sources */,
 				6991BE381AEEB891001C89FC /* RawTests.swift in Sources */,
 				6991BE3B1AEEB891001C89FC /* Playlist.swift in Sources */,
-				6991BE291AEEB87D001C89FC /* CoreDataAccessImpl.swift in Sources */,
+				6991BE291AEEB87D001C89FC /* CoreDataAccess.swift in Sources */,
 				6991BE3C1AEEB891001C89FC /* Audio.swift in Sources */,
 				6991BE371AEEB891001C89FC /* BaseTestCase.swift in Sources */,
 				6991BE2F1AEEB87D001C89FC /* CoreDataManager.swift in Sources */,
-				6991BE2D1AEEB87D001C89FC /* CoreDataAccess.swift in Sources */,
 				6991BE391AEEB891001C89FC /* ModelTests.swift in Sources */,
 				6991BE3A1AEEB891001C89FC /* TestModel.xcdatamodeld in Sources */,
 			);
@@ -199,6 +196,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -279,6 +277,7 @@
 				);
 				INFOPLIST_FILE = ADGCoreDataKitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.adg.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -292,6 +291,7 @@
 				);
 				INFOPLIST_FILE = ADGCoreDataKitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.adg.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -32,31 +32,29 @@ import CoreData
 
 class ModelTests: BaseTestCase {
     
-//MARK: - Tests
-    
-    func testInsertPlaylist() {
-        let playlist: Playlist = self.insertPlaylist("play1")
+    func testInsertPlaylist() throws {
+        let playlist: Playlist = try self.insertPlaylist("play1")
         if let name = playlist.name, order = playlist.order {
             XCTAssertEqual(name, "play1")
             XCTAssertEqual(order, 0)
-            let result = self.dataAccess.delete(object: playlist)
-            XCTAssertTrue(result)
+            try self.dataService.delete(object: playlist)
+            XCTAssert(true)
         } else {
             XCTFail("Couldn't insert playlist correctly");
         }
     }
 
-    func testUpdatePlaylist() {
-        let playlist: Playlist = self.insertPlaylist("play1")
-        let result = self.dataAccess.update(managedObject: playlist, map: ["name": "updated"], error: nil)
-        let array: [Playlist] = self.dataAccess.findObjectsByEntity()
+    func testUpdatePlaylist() throws {
+        let playlist: Playlist = try self.insertPlaylist("play1")
+        try self.dataService.update(managedObject: playlist, map: ["name": "updated"])
+        let array: [Playlist] = try self.dataService.findObjectsByEntity()
         XCTAssertEqual(array.count, 1)
         let updatedPlaylist:Playlist! = array.first
         XCTAssertEqual(updatedPlaylist.name!, "updated")
     }
     
-    func testInsertAudio() {
-        let audio: Audio = self.insertAudio("audio1", playlist: self.insertPlaylist("p1"))
+    func testInsertAudio() throws {
+        let audio: Audio = try self.insertAudio("audio1", playlist: self.insertPlaylist("p1"))
         if let title = audio.title, audioPlaylist = audio.playlist {
             XCTAssertEqual(title, "audio1")
             XCTAssertNotNil(audioPlaylist)
@@ -65,8 +63,8 @@ class ModelTests: BaseTestCase {
         }
     }
     
-    func testInsertAudioWithoutPlaylist() {
-        let audio: Audio = self.insertAudio("audio1", playlist: nil)
+    func testInsertAudioWithoutPlaylist() throws {
+        let audio: Audio = try self.insertAudio("audio1", playlist: nil)
         if let title = audio.title {
             XCTAssertEqual(title, "audio1")
             XCTAssertNil(audio.playlist)
@@ -75,12 +73,12 @@ class ModelTests: BaseTestCase {
         }
     }
     
-    func testGetPlaylistUsingObjectIdString() {
-        let playlist: Playlist = self.insertPlaylist("play1")
-        let objectId = self.dataAccess.stringObjectId(fromMO: playlist)
+    func testGetPlaylistUsingObjectIdString() throws {
+        let playlist: Playlist = try self.insertPlaylist("play1")
+        let objectId = self.dataService.stringObjectId(fromMO: playlist)
         if let objectId = objectId {
-            let retrived: Playlist? = self.dataAccess.findObjectById(objectId: objectId)
-            if let retrieved = retrived, name = retrieved.name {
+            let retrieved: Playlist = try self.dataService.findObjectById(objectId: objectId)
+            if let name = retrieved.name {
                 XCTAssertEqual(name, "play1")
             } else {
                 XCTFail("Playlist object is invalid");
@@ -90,21 +88,21 @@ class ModelTests: BaseTestCase {
         }
     }
     
-    func testGetPlaylistUsingManagedObjectId() {
-        let playlist: Playlist = self.insertPlaylist("play1")
-        let retrived: Playlist? = self.dataAccess.findObjectByManagedObjectId(moId: playlist.objectID)
-        if let retrieved = retrived, name = retrieved.name {
+    func testGetPlaylistUsingManagedObjectId() throws {
+        let playlist: Playlist = try self.insertPlaylist("play1")
+        let retrived: Playlist = try self.dataService.findObjectByManagedObjectId(moId: playlist.objectID)
+        if let name = retrived.name {
             XCTAssertEqual(name, "play1")
         } else {
             XCTFail("Playlist object is invalid");
         }
     }
     
-    func testFindAllPlaylists() {
+    func testFindAllPlaylists() throws {
         for (var i = 0; i < 100; i++) {
-            self.insertPlaylist("play \(i)")
+            try self.insertPlaylist("play \(i)")
         }
-        let result:[Playlist] = self.dataAccess.findObjectsByEntity()
+        let result:[Playlist] = try self.dataService.findObjectsByEntity()
         XCTAssertEqual(result.count, 100)
     }
 }

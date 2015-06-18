@@ -33,105 +33,90 @@ import CoreData
 class RowTests: BaseTestCase {
     
     var coreDataContext: CoreDataContext!
-
+    
     override func setUp() {
         super.setUp()
         self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
     }
     
-    private func insertGenericoMO(name: String, order: Int?) -> NSManagedObject? {
+    private func insertGenericoMO(name: String, order: Int?) throws -> NSManagedObject {
         var map: [String: AnyObject] = ["name": name]
         if let order = order {
             map["order"] = order
         }
-        var error: NSError? = nil
-        let maybeMO: NSManagedObject? = self.dataAccess.insert(entityName: "Playlist", map: map, error: &error)
-        XCTAssertNil(error, "\(error)")
+        let maybeMO: NSManagedObject = try self.dataService.insert(entityName: "Playlist", map: map)
         XCTAssertNotNil(maybeMO)
         return maybeMO
     }
     
-    func testInsertGenericMO() {
+    func testInsertGenericMO() throws {
         
-        let maybeMO: NSManagedObject? = self.insertGenericoMO("play1", order: 0);
-        if let mo = maybeMO {
-            let dto: [String: Any] = self.dataAccess.managedObjectToDictionary(mo)
-            XCTAssertNotNil(dto["name"] as? String)
-        } else {
-            XCTFail("Couldn't insert managed object correctly");
-        }
+        let mo: NSManagedObject = try self.insertGenericoMO("play1", order: 0);
+        let dto: [String: Any] = self.dataService.managedObjectToDictionary(mo)
+        XCTAssertNotNil(dto["name"] as? String)
     }
     
-    func testUpdateGenericMO() {
-        let maybeMO: NSManagedObject? = self.insertGenericoMO("play1", order: 0);
-        if let mo = maybeMO {
-            let result: Bool = self.dataAccess.update(managedObject: mo, map: ["order": 1], error: nil)
-            XCTAssertTrue(result)
-            let maybeUpdatedMO:NSManagedObject? = self.dataAccess.findObjectByManagedObjectId(moId: mo.objectID)
-            if let updatedMO = maybeUpdatedMO {
-                let dto: [String: Any] = self.dataAccess.managedObjectToDictionary(mo)
-                XCTAssertNotNil(dto["order"] as? Int)
-                XCTAssertEqual(dto["order"] as! Int, 1)
-            } else {
-                XCTFail("Couldn't update managed object correctly");
-            }
-        } else {
-            XCTFail("Couldn't insert managed object correctly");
-        }
+    func testUpdateGenericMO() throws {
+        let mo: NSManagedObject = try self.insertGenericoMO("play1", order: 0);
+        try self.dataService.update(managedObject: mo, map: ["order": 1])
+        let updatedMO:NSManagedObject = try self.dataService.findObjectByManagedObjectId(moId: mo.objectID)
+        let dto: [String: Any] = self.dataService.managedObjectToDictionary(updatedMO)
+        XCTAssertNotNil(dto["order"] as? Int)
+        XCTAssertEqual(dto["order"] as! Int, 1)
     }
     
-    func testFindAllGenericManagedObject() {
+    func testFindAllGenericManagedObject() throws {
         
-        let maybeMO: NSManagedObject? = self.insertGenericoMO("play1", order: 0);
-        
-        let list: [NSManagedObject] = self.dataAccess.findObjectsByEntity("Playlist")
+        let _: NSManagedObject? = try self.insertGenericoMO("play1", order: 0);
+        let list: [NSManagedObject] = try self.dataService.findObjectsByEntity("Playlist")
         XCTAssertEqual(1, list.count)
         let object: NSManagedObject? = list.first
         if let object = object {
-            let dto: [String:Any] = self.dataAccess.managedObjectToDictionary(object)
+            let dto: [String:Any] = self.dataService.managedObjectToDictionary(object)
             XCTAssertEqual(dto["name"] as! String, "play1")
         }
     }
     
-    func testFindAll() {
+    func testFindAll() throws {
         for (var i:Int = 0; i < 100; i++) {
-            self.insertPlaylist("play \(i)", order: i)
+            try self.insertPlaylist("play \(i)", order: i)
         }
-        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: nil, page: nil, pageSize: nil, error: nil)
+        let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: nil, page: nil, pageSize: nil)
         XCTAssertEqual(array.count, 100)
     }
     
-    func testFindWithPredicate() {
+    func testFindWithPredicate() throws {
         for (var i:Int = 0; i < 100; i++) {
-            self.insertPlaylist("play \(i)", order: i)
+            try self.insertPlaylist("play \(i)", order: i)
         }
         let predicate = NSPredicate(format: "name CONTAINS %@", "play 2")
-        let array: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: predicate, page: nil, pageSize: nil, error: nil)
+        let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: predicate, page: nil, pageSize: nil)
         XCTAssertEqual(array.count, 11)
     }
     
-    func testFindWithPaggingAndOrder() {
+    func testFindWithPaggingAndOrder() throws {
         for (var i:Int = 0; i < 100; i++) {
-            self.insertPlaylist("play \(i)", order: i)
+            try self.insertPlaylist("play \(i)", order: i)
         }
-        let arrayPage0: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 0, pageSize: 10, error: nil)
-        let arrayPage1: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 1, pageSize: 10, error: nil)
-        let arrayPage9: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 9, pageSize: 10, error: nil)
-        let arrayPage10: [NSManagedObject] = self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 10, pageSize: 10, error: nil)
+        
+        let arrayPage0: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 0, pageSize: 10)
+        let arrayPage1: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 1, pageSize: 10)
+        let arrayPage9: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 9, pageSize: 10)
+        let arrayPage10: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 10, pageSize: 10)
         XCTAssertEqual(arrayPage0.count, 10)
         XCTAssertEqual(arrayPage1.count, 10)
         XCTAssertEqual(arrayPage9.count, 10)
         XCTAssertEqual(arrayPage10.count, 0)
-        var object1: NSManagedObject = arrayPage0.first!
-        var object10: NSManagedObject = arrayPage0.last!
+        var object1: NSManagedObject = arrayPage0.first! as! NSManagedObject
+        var object10: NSManagedObject = arrayPage0.last! as! NSManagedObject
         XCTAssertEqual(object1.valueForKey("name") as! String, "play 0")
         XCTAssertEqual(object10.valueForKey("name") as! String, "play 9")
-        object1 = arrayPage1.first!
-        object10 = arrayPage1.last!
+        object1 = arrayPage1.first! as! NSManagedObject
+        object10 = arrayPage1.last! as! NSManagedObject
         XCTAssertEqual(object1.valueForKey("name") as! String, "play 10")
         XCTAssertEqual(object10.valueForKey("name") as! String, "play 19")
-        object1 = arrayPage9.first!
-        object10 = arrayPage9.last!
+        object1 = arrayPage9.first! as! NSManagedObject
+        object10 = arrayPage9.last! as! NSManagedObject
         XCTAssertEqual(object1.valueForKey("name") as! String, "play 90")
         XCTAssertEqual(object10.valueForKey("name") as! String, "play 99")
     }
