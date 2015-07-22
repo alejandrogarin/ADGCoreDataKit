@@ -45,3 +45,7 @@ class ViewController: UITableViewController {
 }
 
 ```
+
+#### Subclassing NSManagedObject
+
+TODO
