@@ -1,0 +1,14 @@
+PODS:
+  - ADGCoreDataKit (0.1.0)
+
+DEPENDENCIES:
+  - ADGCoreDataKit (from `../`)
+
+EXTERNAL SOURCES:
+  ADGCoreDataKit:
+    :path: ../
+
+SPEC CHECKSUMS:
+  ADGCoreDataKit: 34943d551bf011cfb76cee4b11f4dbdb3cd764bd
+
+COCOAPODS: 0.38.0

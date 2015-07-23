@@ -1,0 +1,26 @@
+{
+  "name": "ADGCoreDataKit",
+  "version": "0.1.0",
+  "summary": "Apple CoreData made easy.",
+  "description": "An interface to Apple Core Data",
+  "homepage": "https://github.com/alejandrogarin/ADGCoreDataKit",
+  "license": "MIT",
+  "authors": {
+    "Alejandro Garin": "agarin@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/alejandrogarin/ADGCoreDataKit.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "requires_arc": true,
+  "source_files": "Pod/Classes/**/*",
+  "resource_bundles": {
+    "ADGCoreDataKit": [
+      "Pod/Assets/*.png"
+    ]
+  },
+  "frameworks": "CoreData"
+}

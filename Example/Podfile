@@ -1,0 +1,12 @@
+source 'https://github.com/CocoaPods/Specs.git'
+use_frameworks!
+
+target 'ADGCoreDataKit_Example', :exclusive => true do
+  pod "ADGCoreDataKit", :path => "../"
+end
+
+target 'ADGCoreDataKit_Tests', :exclusive => true do
+  pod "ADGCoreDataKit", :path => "../"
+
+  
+end

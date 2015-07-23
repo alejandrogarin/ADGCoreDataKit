@@ -2,7 +2,7 @@
 
 ## Requirement
 
-Swift 2.0
+Swift 2.0 SDK beta 4
 
 A set of classes for easy to use CoreData
 
