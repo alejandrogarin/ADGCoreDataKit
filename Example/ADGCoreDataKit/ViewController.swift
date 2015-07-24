@@ -19,7 +19,6 @@ class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
 class ViewController: UITableViewController {
     
     var coreData:CoreDataManager?
-    
     var datasource: [[String:Any]] = []
     var dao: ManagedObjectDAO!
     
