@@ -28,12 +28,15 @@
 
 import CoreData
 
-//TODO: improve names
 public enum CoreDataKitError: ErrorType {
     case NoStore
     case CannotCreateObject
     case ObjectNotFound
     case InvalidCast
+}
+
+public enum CoreDataKitKeys: String {
+    case ObjectId = "_core_data_object_id"
 }
 
 public protocol CoreDataManagerDelegate: class {

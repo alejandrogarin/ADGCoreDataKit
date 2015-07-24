@@ -10,33 +10,40 @@ import UIKit
 import CoreData
 import ADGCoreDataKit
 
+class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
+    override init(usingContext context: CoreDataContext) {
+        super.init(usingContext: context)
+    }
+}
+
 class ViewController: UITableViewController {
     
     var coreData:CoreDataManager?
     
     var datasource: [[String:Any]] = []
-    
-    var dataService: CoreDataService?
+    var dao: ManagedObjectDAO!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.coreData = try! CoreDataManager(usingModelName: "Model")
-        self.dataService = CoreDataService(usingCoreDataManager: coreData!, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+        let context = CoreDataContext(usingPersistentStoreCoordinator: self.coreData!.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+        
+        self.dao = ManagedObjectDAO(usingContext: context)
         
         print("----- empty the table ----")
-        try! self.dataService!.truncate("TableA")
+        try! self.dao.truncate("TableA")
         
         print("----- insert some rows ----")
         for (var i=0; i < 10; i++) {
-            let _:NSManagedObject = try! self.dataService!.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i])
+            try! self.dao.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i])
         }
         print("----- get the array of managed object ----")
-        let result:[NSManagedObject] = try! self.dataService!.findObjectsByEntity("TableA")
+        let result = try! self.dao.findObjectsByEntity("TableA")
         print(result)
         
         print("----- create an array of dictionary elements representing the retrieved managed objects ----")
-        self.datasource = self.dataService!.managedObjectsToDictionary(result)
+        self.datasource = self.dao.managedObjectsToDictionary(result)
         print(self.datasource)
         
         self.tableView.reloadData()
@@ -50,7 +57,7 @@ class ViewController: UITableViewController {
         if editingStyle == UITableViewCellEditingStyle.Delete {
             
             print("----- delete the object from the store ----")
-            try! self.deleteObject(self.datasource[indexPath.row][CoreDataService.Keys.CORE_DATA_OBJECT_ID.rawValue] as! String, atIndex: indexPath.row)
+            try! self.deleteObject(self.datasource[indexPath.row][CoreDataKitKeys.ObjectId.rawValue] as! String, atIndex: indexPath.row)
             print("----- update both the local datasource and the tableview ----")
             self.tableView.beginUpdates()
             self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
@@ -64,7 +71,7 @@ class ViewController: UITableViewController {
     }
     
     func deleteObject(let objectId: String, atIndex: Int) throws {
-        try self.dataService!.delete(objectId: objectId)
+        try self.dao.delete(objectId: objectId)
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {

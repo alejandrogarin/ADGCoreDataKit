@@ -1,5 +1,5 @@
 //
-//  RowTests.swift
+//  RawTests.swift
 //  ADGCoreDataKit
 //
 //  Created by Alejandro Diego Garin
@@ -31,13 +31,19 @@ import XCTest
 import CoreData
 import ADGCoreDataKit
 
+class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
+    override init(usingContext context: CoreDataContext) {
+        super.init(usingContext: context)
+    }
+}
+
 class RawTests: BaseTestCase {
     
-    var coreDataContext: CoreDataContext!
+    var dao: ManagedObjectDAO!
     
     override func setUp() {
         super.setUp()
-        self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+        self.dao = ManagedObjectDAO(usingContext: coreDataContext)
     }
     
     private func insertGenericoMO(name: String, order: Int?) throws -> NSManagedObject {
@@ -45,15 +51,27 @@ class RawTests: BaseTestCase {
         if let order = order {
             map["order"] = order
         }
-        let maybeMO: NSManagedObject = try self.dataService.insert(entityName: "Playlist", map: map)
-        XCTAssertNotNil(maybeMO)
-        return maybeMO
+        let mo: NSManagedObject = try self.dao.insert(entityName: "Playlist", map: map)
+        XCTAssertNotNil(mo)
+        return mo
+    }
+    
+    func testInsertManagedObjectUsingDAO() {
+        do {
+            let map: [String: AnyObject] = ["name": name]
+            try self.dao.insert(entityName: "Playlist", map: map)
+            let count = try self.dao.findObjectsByEntity("Playlist").count
+            XCTAssertEqual(1, count)
+        } catch {
+            XCTFail()
+        }
     }
     
     func testInsertGenericMO() {
         do {
-            let mo: NSManagedObject = try self.insertGenericoMO("play1", order: 0);
-            let dto: [String: Any] = self.dataService.managedObjectToDictionary(mo)
+            var mo: NSManagedObject?
+            mo = try self.insertGenericoMO("play1", order: 0);
+            let dto: [String: Any] = self.dao.managedObjectToDictionary(mo!)
             XCTAssertNotNil(dto["name"] as? String)
         } catch {
             XCTFail()
@@ -63,9 +81,9 @@ class RawTests: BaseTestCase {
     func testUpdateGenericMO() {
         do {
             let mo: NSManagedObject = try self.insertGenericoMO("play1", order: 0);
-            try self.dataService.update(managedObject: mo, map: ["order": 1])
-            let updatedMO:NSManagedObject = try self.dataService.findObjectByManagedObjectId(moId: mo.objectID)
-            let dto: [String: Any] = self.dataService.managedObjectToDictionary(updatedMO)
+            try self.dao.update(managedObject: mo, map: ["order": 1])
+            let updatedMO = try self.dao.findObjectByManagedObjectId(moId: mo.objectID)
+            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedMO)
             XCTAssertNotNil(dto["order"] as? Int)
             XCTAssertEqual(dto["order"] as! Int, 1)
         } catch {
@@ -75,12 +93,12 @@ class RawTests: BaseTestCase {
     
     func testFindAllGenericManagedObject() {
         do {
-            let _: NSManagedObject? = try self.insertGenericoMO("play1", order: 0);
-            let list: [NSManagedObject] = try self.dataService.findObjectsByEntity("Playlist")
+            try self.insertGenericoMO("play1", order: 0);
+            let list = try self.dao.findObjectsByEntity("Playlist")
             XCTAssertEqual(1, list.count)
             let object: NSManagedObject? = list.first
             if let object = object {
-                let dto: [String:Any] = self.dataService.managedObjectToDictionary(object)
+                let dto: [String:Any] = self.dao.managedObjectToDictionary(object)
                 XCTAssertEqual(dto["name"] as! String, "play1")
             }
         } catch {

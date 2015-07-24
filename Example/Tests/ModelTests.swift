@@ -32,6 +32,10 @@ import CoreData
 import ADGCoreDataKit
 
 class ModelTests: BaseTestCase {
+        
+    override func setUp() {
+        super.setUp()
+    }
     
     func testInsertPlaylist() {
         do {
@@ -39,7 +43,7 @@ class ModelTests: BaseTestCase {
             if let name = playlist.name, order = playlist.order {
                 XCTAssertEqual(name, "play1")
                 XCTAssertEqual(order, 0)
-                try self.dataService.delete(object: playlist)
+                try self.playlistDAO.delete(object: playlist)
                 XCTAssert(true)
             } else {
                 XCTFail("Couldn't insert playlist correctly");
@@ -52,8 +56,8 @@ class ModelTests: BaseTestCase {
     func testUpdatePlaylist() {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            try self.dataService.update(managedObject: playlist, map: ["name": "updated"])
-            let array: [Playlist] = try self.dataService.findObjectsByEntity()
+            try self.playlistDAO.update(managedObject: playlist, map: ["name": "updated"])
+            let array: [Playlist] = try self.playlistDAO.findObjectsByEntity()
             XCTAssertEqual(array.count, 1)
             let updatedPlaylist:Playlist! = array.first
             XCTAssertEqual(updatedPlaylist.name!, "updated")
@@ -93,9 +97,9 @@ class ModelTests: BaseTestCase {
     func testGetPlaylistUsingObjectIdString() {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let objectId = self.dataService.stringObjectId(fromMO: playlist)
+            let objectId = self.playlistDAO.stringObjectId(fromMO: playlist)
             if let objectId = objectId {
-                let retrieved: Playlist = try self.dataService.findObjectById(objectId: objectId)
+                let retrieved: Playlist = try self.playlistDAO.findObjectById(objectId: objectId)
                 if let name = retrieved.name {
                     XCTAssertEqual(name, "play1")
                 } else {
@@ -112,7 +116,7 @@ class ModelTests: BaseTestCase {
     func testGetPlaylistUsingManagedObjectId() {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let retrived: Playlist = try self.dataService.findObjectByManagedObjectId(moId: playlist.objectID)
+            let retrived: Playlist = try self.playlistDAO.findObjectByManagedObjectId(moId: playlist.objectID)
             if let name = retrived.name {
                 XCTAssertEqual(name, "play1")
             } else {
@@ -128,7 +132,7 @@ class ModelTests: BaseTestCase {
             for (var i = 0; i < 100; i++) {
                 try self.insertPlaylist("play \(i)")
             }
-            let result:[Playlist] = try self.dataService.findObjectsByEntity()
+            let result:[Playlist] = try self.playlistDAO.findObjectsByEntity()
             XCTAssertEqual(result.count, 100)
         } catch {
             XCTFail()

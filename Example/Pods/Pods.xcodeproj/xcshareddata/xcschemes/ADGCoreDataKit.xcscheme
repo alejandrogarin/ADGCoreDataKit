@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F1319E22F8E1C3FE6D0AC8BD"
+               BlueprintIdentifier = "C4682E5C6CDD40D43BB9C1CA"
                BuildableName = "ADGCoreDataKit.framework"
                BlueprintName = "ADGCoreDataKit"
                ReferencedContainer = "container:Pods.xcodeproj">
