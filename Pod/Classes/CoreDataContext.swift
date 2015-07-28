@@ -66,7 +66,7 @@ public class CoreDataContext: NSObject {
     }
     
     public func findObjectById(objectId: NSManagedObjectID) throws -> NSManagedObject {
-        return objectContext.objectWithID(objectId)
+        return try objectContext.existingObjectWithID(objectId)
     }
 
     public func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {

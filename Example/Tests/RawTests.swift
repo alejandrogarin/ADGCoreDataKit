@@ -46,7 +46,7 @@ class RawTests: BaseTestCase {
         self.dao = ManagedObjectDAO(usingContext: coreDataContext)
     }
     
-    private func insertGenericoMO(name: String, order: Int?) throws -> NSManagedObject {
+    private func insertPlaylistManagedObject(name: String, order: Int?) throws -> NSManagedObject {
         var map: [String: AnyObject] = ["name": name]
         if let order = order {
             map["order"] = order
@@ -56,7 +56,7 @@ class RawTests: BaseTestCase {
         return mo
     }
     
-    func testInsertManagedObjectUsingDAO() {
+    func testInsertPlaylistUsingDAO() {
         do {
             let map: [String: AnyObject] = ["name": name]
             try self.dao.insert(entityName: "Playlist", map: map)
@@ -67,10 +67,10 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testInsertGenericMO() {
+    func testInsertPlaylistOptional() {
         do {
             var mo: NSManagedObject?
-            mo = try self.insertGenericoMO("play1", order: 0);
+            mo = try self.insertPlaylistManagedObject("play1", order: 0);
             let dto: [String: Any] = self.dao.managedObjectToDictionary(mo!)
             XCTAssertNotNil(dto["name"] as? String)
         } catch {
@@ -78,12 +78,12 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testUpdateGenericMO() {
+    func testUpdatePlaylist() {
         do {
-            let mo: NSManagedObject = try self.insertGenericoMO("play1", order: 0);
-            try self.dao.update(managedObject: mo, map: ["order": 1])
-            let updatedMO = try self.dao.findObjectByManagedObjectId(moId: mo.objectID)
-            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedMO)
+            let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
+            try self.dao.update(managedObject: playlist, map: ["order": 1])
+            let updatedPlaylist = try self.dao.findObjectByManagedObjectId(moId: playlist.objectID)
+            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedPlaylist)
             XCTAssertNotNil(dto["order"] as? Int)
             XCTAssertEqual(dto["order"] as! Int, 1)
         } catch {
@@ -91,9 +91,33 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testFindAllGenericManagedObject() {
+    func testPlaylistUpdateWithNilValue() {
         do {
-            try self.insertGenericoMO("play1", order: 0);
+            let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
+            try self.dao.update(managedObject: playlist, map: ["name": nil])
+            let updatedPlaylist = try self.dao.findObjectByManagedObjectId(moId: playlist.objectID)
+            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedPlaylist)
+            XCTAssertNil(dto["name"] as? String)
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testUpdatePlaylistWithInvalidObjectId() {
+        do {
+            let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
+            try self.dao.update(managedObject: playlist, map: ["order": 1])
+            try self.dao.findObjectById(objectId: "The invalid object id 123455")
+        } catch CoreDataKitError.InvalidManagedObjectIdString {
+            XCTAssertTrue(true)
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testCreateAndFindPlaylist() {
+        do {
+            try self.insertPlaylistManagedObject("play1", order: 0);
             let list = try self.dao.findObjectsByEntity("Playlist")
             XCTAssertEqual(1, list.count)
             let object: NSManagedObject? = list.first
@@ -106,7 +130,7 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testFindAll() {
+    func testFindAllPlaylists() {
         do {
             for (var i:Int = 0; i < 100; i++) {
                 try self.insertPlaylist("play \(i)", order: i)
@@ -118,7 +142,7 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testFindWithPredicate() {
+    func testFindPlaylistWithPredicate() {
         do {
             for (var i:Int = 0; i < 100; i++) {
                 try self.insertPlaylist("play \(i)", order: i)
@@ -131,7 +155,7 @@ class RawTests: BaseTestCase {
         }
     }
     
-    func testFindWithPaggingAndOrder() {
+    func testFindPlaylistWithPaggingAndOrder() {
         do {
             for (var i:Int = 0; i < 100; i++) {
                 try self.insertPlaylist("play \(i)", order: i)

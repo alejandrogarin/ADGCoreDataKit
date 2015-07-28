@@ -29,10 +29,11 @@
 import CoreData
 
 public enum CoreDataKitError: ErrorType {
-    case NoStore
-    case CannotCreateObject
-    case ObjectNotFound
-    case InvalidCast
+    case CannotFindObjectModel(name: String, bundle: NSBundle)
+    case CannotCreateManagedModelObject(path: String)
+    case InvalidManagedObjectIdString
+    case ManagedObjectIdNotFound
+    case CannotCastManagedObject
 }
 
 public enum CoreDataKitKeys: String {
@@ -52,7 +53,7 @@ public class CoreDataManager: NSObject {
     let modelName : String
     let icloud : Bool
     let appGroup: String?
-    let bundle: NSBundle?
+    let bundle: NSBundle
 
     var objectModel : NSManagedObjectModel?
     
@@ -66,7 +67,11 @@ public class CoreDataManager: NSObject {
         self.modelName = modelName;
         self.appGroup = appGroup;
         self.icloud = enableCloud;
-        self.bundle = bundle;
+        if let bundle = bundle {
+            self.bundle = bundle;
+        } else {
+            self.bundle = NSBundle.mainBundle()
+        }
         super.init();
         
         self.storeCoordinator = try self.createPersistentStoreCoordinator()
@@ -142,33 +147,19 @@ public class CoreDataManager: NSObject {
     }
     
     private func createManagedObjectModel() throws -> NSManagedObjectModel {
-        var error: NSError! = NSError(domain: "Migrator", code: 0, userInfo: nil)
-        
         if (self.objectModel != nil) {
-            if let value = self.objectModel {
-                return value
-            }
-            throw error;
+            return self.objectModel!
         }
         
-        var maybeURL: NSURL? = nil
-        if let bundle = self.bundle {
-            maybeURL = bundle.URLForResource(self.modelName, withExtension: "momd");
-        } else {
-            maybeURL = NSBundle.mainBundle().URLForResource(self.modelName, withExtension: "momd");
+        guard let modelURL = self.bundle.URLForResource(self.modelName, withExtension: "momd") else {
+            throw CoreDataKitError.CannotFindObjectModel(name: self.modelName, bundle: self.bundle)
+        }
+
+        guard let managedObjectModel = NSManagedObjectModel(contentsOfURL: modelURL) else {
+            throw CoreDataKitError.CannotCreateManagedModelObject(path: modelURL.absoluteString)
         }
         
-        if let url = maybeURL {
-            if let value = NSManagedObjectModel(contentsOfURL: url) {
-                return value
-            }
-            throw error;
-        } else {
-            if (true) {
-                error = createCoreDataError(code: 100, failureReason: "Could not find the path for your data model: \(self.modelName)");
-            }
-            throw error;
-        }
+        return managedObjectModel
     }
     
     private func createPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
@@ -183,11 +174,7 @@ public class CoreDataManager: NSObject {
         let storeFile: String = self.modelName + ".sqlite";
         let documentDirectory: NSURL? = applicationDocumentDirectory();
         let storeURL: NSURL? = documentDirectory?.URLByAppendingPathComponent(storeFile);
-        
-        if (storeURL == nil) {
-            throw CoreDataKitError.NoStore
-        }
-        
+
         objectModel = try createManagedObjectModel()
         
         let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!);

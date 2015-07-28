@@ -51,24 +51,21 @@ public class CoreDataDAO<T: NSManagedObject> {
             genericMO.setValue(map[key], forKey: key)
         }
         try self.coreDataContext.saveContext()
-        if let mo = genericMO as? T {
-            return mo
+        guard let managedEntity = genericMO as? T else {
+            throw CoreDataKitError.CannotCastManagedObject
         }
-        throw CoreDataKitError.CannotCreateObject
+        return managedEntity
     }
     
     public func update(objectId objectId: String, map: [String:AnyObject?]) throws -> T {
-        let genericMO: T? = try self.findObjectById(objectId: objectId)
+        let managedObject: T = try self.findObjectById(objectId: objectId)
         
-        if let mo = genericMO as? NSManagedObject {
-            for key in map.keys {
-                let maybeValue: AnyObject? = map[key]!
-                mo.setValue(maybeValue, forKey: key)
-            }
-            try coreDataContext.saveContext()
-            return genericMO!
+        for key in map.keys {
+            let maybeValue: AnyObject? = map[key]!
+            (managedObject as NSManagedObject).setValue(maybeValue, forKey: key)
         }
-        throw CoreDataKitError.ObjectNotFound
+        try coreDataContext.saveContext()
+        return managedObject
     }
     
     public func update(managedObject mo: NSManagedObject, map: [String:AnyObject?]) throws {
@@ -140,7 +137,7 @@ public class CoreDataDAO<T: NSManagedObject> {
     
     public func findObjectByManagedObjectId(moId moId: NSManagedObjectID) throws ->T {
         guard let object = try self.coreDataContext.findObjectById(moId) as? T else {
-            throw CoreDataKitError.InvalidCast
+            throw CoreDataKitError.CannotCastManagedObject
         }
         return object
     }
@@ -148,11 +145,11 @@ public class CoreDataDAO<T: NSManagedObject> {
     public func findObjectById(objectId objectId: String) throws -> T {
         
         guard let url = NSURL(string: objectId) else {
-            throw CoreDataKitError.ObjectNotFound
+            throw CoreDataKitError.InvalidManagedObjectIdString
         }
         
         guard let objectId = self.coreDataContext.persistentCoordinator.managedObjectIDForURIRepresentation(url) else {
-            throw CoreDataKitError.ObjectNotFound
+            throw CoreDataKitError.ManagedObjectIdNotFound
         }
         
         return try self.findObjectByManagedObjectId(moId: objectId)
