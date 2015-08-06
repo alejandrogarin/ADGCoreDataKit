@@ -12,8 +12,12 @@
         <attribute name="order" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
         <relationship name="audios" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Audio" inverseName="playlist" inverseEntity="Audio" syncable="YES"/>
     </entity>
+    <entity name="Test" syncable="YES">
+        <attribute name="field1" attributeType="String" syncable="YES"/>
+    </entity>
     <elements>
         <element name="Audio" positionX="-108" positionY="-9" width="128" height="105"/>
         <element name="Playlist" positionX="-389" positionY="-9" width="128" height="105"/>
+        <element name="Test" positionX="-252" positionY="27" width="128" height="60"/>
     </elements>
 </model>

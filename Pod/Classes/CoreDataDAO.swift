@@ -32,7 +32,7 @@ import CoreData
 public class CoreDataDAO<T: NSManagedObject> {
     
     private let coreDataContext: CoreDataContext
-
+    
     public var entityName:String {
         return self.guessEntityName()
     }
@@ -45,13 +45,17 @@ public class CoreDataDAO<T: NSManagedObject> {
         return try self.insert(entityName: entityName, map: map)
     }
     
-    public func insert(entityName entityName: String, map: [String: AnyObject]) throws -> T {
-        let genericMO = self.coreDataContext.insertObjectForEntity(entityName)
+    public func insert(entityName entityName: String, map: [String: AnyObject?]) throws -> T {
+        let managedObject = self.coreDataContext.insertObjectForEntity(entityName)
         for key in map.keys {
-            genericMO.setValue(map[key], forKey: key)
+            if let value = map[key] {
+                managedObject.setValue(value, forKey: key)
+            } else {
+                managedObject.setValue(nil, forKey: key)
+            }
         }
         try self.coreDataContext.saveContext()
-        guard let managedEntity = genericMO as? T else {
+        guard let managedEntity = managedObject as? T else {
             throw CoreDataKitError.CannotCastManagedObject
         }
         return managedEntity
@@ -59,7 +63,6 @@ public class CoreDataDAO<T: NSManagedObject> {
     
     public func update(objectId objectId: String, map: [String:AnyObject?]) throws -> T {
         let managedObject: T = try self.findObjectById(objectId: objectId)
-        
         for key in map.keys {
             let maybeValue: AnyObject? = map[key]!
             (managedObject as NSManagedObject).setValue(maybeValue, forKey: key)
@@ -77,18 +80,14 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
 
     private func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [T] {
-        let list: [AnyObject]? = try self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize)
-        if let actualList = list {
-            var newArray : [T] = []
-            for anyObject in actualList {
-                if (anyObject is T) {
-                    newArray.append(anyObject as! T)
-                }
+        let list: [AnyObject] = try self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize)
+        var newArray : [T] = []
+        for anyObject in list {
+            if let anyObject = anyObject as? T {
+                newArray.append(anyObject)
             }
-            return newArray
-        } else {
-            return []
         }
+        return newArray
     }
     
     public func findObjectsByEntity(entityName: String) throws -> [T] {
@@ -143,7 +142,6 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func findObjectById(objectId objectId: String) throws -> T {
-        
         guard let url = NSURL(string: objectId) else {
             throw CoreDataKitError.InvalidManagedObjectIdString
         }
@@ -156,7 +154,7 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func delete(objectId objectId: String) throws {
-        self.coreDataContext.deleteObject(byObjectId: objectId)
+        try self.coreDataContext.deleteObject(byObjectId: objectId)
         try self.coreDataContext.saveContext()
     }
     
@@ -187,7 +185,7 @@ public class CoreDataDAO<T: NSManagedObject> {
         return try self.findObjectByEntity(self.entityName, withKey: key, andValue: value);
     }
     
-    public func stringObjectId(fromMO mo: NSManagedObject) -> String? {
+    public class func stringObjectId(fromMO mo: NSManagedObject) -> String {
         let objectId : NSManagedObjectID = mo.objectID
         let url = objectId.URIRepresentation()
         let absURL = url.absoluteString
@@ -203,7 +201,7 @@ public class CoreDataDAO<T: NSManagedObject> {
                     dtoMap[key] = value
                 }
             }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = self.stringObjectId(fromMO: object)
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result
@@ -218,7 +216,6 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
-        
         var result:[[String:Any]] = []
         for object in managedObjects {
             var dtoMap: [String: Any] = [:]
@@ -228,7 +225,7 @@ public class CoreDataDAO<T: NSManagedObject> {
                     dtoMap[key] = value
                 }
             }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = self.stringObjectId(fromMO: object)
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result

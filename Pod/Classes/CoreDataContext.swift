@@ -89,29 +89,24 @@ public class CoreDataContext: NSObject {
         return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
     }
     
-    public func deleteObject(byObjectId objectId: String) -> Bool {
+    public func deleteObject(byObjectId objectId: String) throws {
         
         guard let url = NSURL(string: objectId) else {
-            return false
+            throw CoreDataKitError.InvalidManagedObjectIdString
         }
         
         guard let objectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
-            return false
+            throw CoreDataKitError.ManagedObjectIdNotFound
         }
         
-        do {
-            try self.deleteObject(self.findObjectById(objectId))
-            return true
-        } catch {
-            return false
-        }
+        try self.deleteObject(self.findObjectById(objectId))
     }
     
     public func deleteObject(managedObject : NSManagedObject) -> Void {
-        objectContext.deleteObject(managedObject);
+        objectContext.deleteObject(managedObject)
     }
     
-    public func saveContext () throws {
+    public func saveContext() throws {
         try objectContext.save()
     }
 }

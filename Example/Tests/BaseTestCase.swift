@@ -53,7 +53,7 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         do {
-            self.coreDataManager = try CoreDataManager(usingModelName: "TestModel", inBundle:NSBundle(forClass: BaseTestCase.self),  securityApplicationGroup: nil, enableCloud: false)
+            self.coreDataManager = try CoreDataManager(usingModelName: "TestModel", sqlFileName: nil, inBundle:NSBundle(forClass: BaseTestCase.self),  securityApplicationGroup: nil, enableCloud: false)
             self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
             
             self.audioDAO = AudioDAO(usingContext: self.coreDataContext)
@@ -89,9 +89,7 @@ class BaseTestCase: XCTestCase {
     
     func insertPlaylist(name: String, order: Int?) throws -> Playlist {
         var map: [String: AnyObject] = ["name": name]
-        if let order = order {
-            map["order"] = order
-        }
+        map["order"] = order
         let playlist: Playlist = try self.playlistDAO.insert(map: map)
         XCTAssertNotNil(playlist)
         return playlist;

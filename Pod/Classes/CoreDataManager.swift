@@ -54,6 +54,7 @@ public class CoreDataManager: NSObject {
     let icloud : Bool
     let appGroup: String?
     let bundle: NSBundle
+    let sqlFileName: String?
 
     var objectModel : NSManagedObjectModel?
     
@@ -63,16 +64,17 @@ public class CoreDataManager: NSObject {
         return self.storeCoordinator!
     }
     
-    public init(usingModelName modelName: String, inBundle bundle: NSBundle?, securityApplicationGroup appGroup : String?, enableCloud : Bool) throws {
-        self.modelName = modelName;
-        self.appGroup = appGroup;
-        self.icloud = enableCloud;
+    public init(usingModelName modelName: String, sqlFileName: String?, inBundle bundle: NSBundle?, securityApplicationGroup appGroup: String?, enableCloud: Bool) throws {
+        self.modelName = modelName
+        self.appGroup = appGroup
+        self.icloud = enableCloud
+        self.sqlFileName = sqlFileName
         if let bundle = bundle {
-            self.bundle = bundle;
+            self.bundle = bundle
         } else {
             self.bundle = NSBundle.mainBundle()
         }
-        super.init();
+        super.init()
         
         self.storeCoordinator = try self.createPersistentStoreCoordinator()
         
@@ -88,15 +90,15 @@ public class CoreDataManager: NSObject {
     }
     
     public convenience init(usingModelName modelName: String, securityApplicationGroup appGroup : String?, enableCloud : Bool) throws {
-        try self.init(usingModelName: modelName, inBundle: nil, securityApplicationGroup:appGroup, enableCloud:enableCloud);
+        try self.init(usingModelName: modelName, sqlFileName: nil, inBundle: nil, securityApplicationGroup:appGroup, enableCloud:enableCloud)
     }
     
     public convenience init(usingModelName modelName: String) throws {
-        try self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:false);
+        try self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:false)
     }
     
     public convenience init(usingModelName modelName: String, enableCloud : Bool) throws {
-        try self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:enableCloud);
+        try self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:enableCloud)
     }
     
     private func createCoreDataError(code code: Int, failureReason: String) -> NSError {
@@ -138,11 +140,11 @@ public class CoreDataManager: NSObject {
     }
     
     private func applicationDocumentDirectory() -> NSURL? {
-        let fileManager = NSFileManager.defaultManager();
+        let fileManager = NSFileManager.defaultManager()
         if let actualAppGroup = self.appGroup {
-            return fileManager.containerURLForSecurityApplicationGroupIdentifier(actualAppGroup);
+            return fileManager.containerURLForSecurityApplicationGroupIdentifier(actualAppGroup)
         }
-        let urlsForDir = fileManager.URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask);
+        let urlsForDir = fileManager.URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask)
         return urlsForDir.first
     }
     
@@ -163,21 +165,24 @@ public class CoreDataManager: NSObject {
     }
     
     private func createPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
-
         var storeOptions: [NSObject : AnyObject]? = nil
         if (self.icloud) {
             NSLog("%@:%@ - creating an iCloud enabled persistent store", String(self), __FUNCTION__)
-            storeOptions = [NSPersistentStoreUbiquitousContentNameKey:"container_\(self.modelName)", NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true];
+            storeOptions = [NSPersistentStoreUbiquitousContentNameKey:"container_\(self.modelName)", NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
         } else {
-            storeOptions = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true];
+            storeOptions = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
         }
-        let storeFile: String = self.modelName + ".sqlite";
-        let documentDirectory: NSURL? = applicationDocumentDirectory();
-        let storeURL: NSURL? = documentDirectory?.URLByAppendingPathComponent(storeFile);
+
+        var storeFile = self.modelName + ".sqlite"
+        if let sqlFileName = self.sqlFileName {
+            storeFile = sqlFileName + ".sqlite"
+        }
+        let documentDirectory: NSURL? = applicationDocumentDirectory()
+        let storeURL: NSURL? = documentDirectory?.URLByAppendingPathComponent(storeFile)
 
         objectModel = try createManagedObjectModel()
         
-        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!);
+        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!)
         try storeCoordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: storeOptions)
         return storeCoordinator
     }

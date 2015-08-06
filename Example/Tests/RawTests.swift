@@ -56,12 +56,30 @@ class RawTests: BaseTestCase {
         return mo
     }
     
+    func testAddObjectWithNotOptional() {
+        do {
+            try self.dao.insert(entityName: "Test", map: [:])
+            XCTFail("the insert should fail because of the non optinal attribute")
+        } catch let error as NSError {
+            XCTAssertEqual(1570, error.code)
+        }
+    }
+    
     func testInsertPlaylistUsingDAO() {
         do {
             let map: [String: AnyObject] = ["name": name]
             try self.dao.insert(entityName: "Playlist", map: map)
             let count = try self.dao.findObjectsByEntity("Playlist").count
             XCTAssertEqual(1, count)
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testInsertWithNullValues() {
+        do {
+            let object = try self.dao.insert(entityName: "Playlist", map: ["name":nil, "order": 1])
+            XCTAssertTrue(object.valueForKey("name") == nil)
         } catch {
             XCTFail()
         }
@@ -81,10 +99,11 @@ class RawTests: BaseTestCase {
     func testUpdatePlaylist() {
         do {
             let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
-            try self.dao.update(managedObject: playlist, map: ["order": 1])
+            try self.dao.update(managedObject: playlist, map: ["order": 1, "name": nil])
             let updatedPlaylist = try self.dao.findObjectByManagedObjectId(moId: playlist.objectID)
             let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedPlaylist)
             XCTAssertNotNil(dto["order"] as? Int)
+            XCTAssertTrue(dto["name"] == nil)
             XCTAssertEqual(dto["order"] as! Int, 1)
         } catch {
             XCTFail()

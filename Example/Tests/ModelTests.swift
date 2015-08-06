@@ -97,16 +97,12 @@ class ModelTests: BaseTestCase {
     func testGetPlaylistUsingObjectIdString() {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let objectId = self.playlistDAO.stringObjectId(fromMO: playlist)
-            if let objectId = objectId {
-                let retrieved: Playlist = try self.playlistDAO.findObjectById(objectId: objectId)
-                if let name = retrieved.name {
-                    XCTAssertEqual(name, "play1")
-                } else {
-                    XCTFail("Playlist object is invalid");
-                }
+            let objectId = CoreDataDAO.stringObjectId(fromMO: playlist)
+            let retrieved: Playlist = try self.playlistDAO.findObjectById(objectId: objectId)
+            if let name = retrieved.name {
+                XCTAssertEqual(name, "play1")
             } else {
-                XCTFail("Playlist object id not found");
+                XCTFail("Playlist object is invalid");
             }
         } catch {
             XCTFail()
