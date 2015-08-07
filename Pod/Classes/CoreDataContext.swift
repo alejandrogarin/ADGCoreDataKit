@@ -109,4 +109,8 @@ public class CoreDataContext: NSObject {
     public func saveContext() throws {
         try objectContext.save()
     }
+    
+    public func rollbackContext() {
+        objectContext.rollback()
+    }
 }

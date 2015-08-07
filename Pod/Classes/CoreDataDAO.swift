@@ -33,6 +33,12 @@ public class CoreDataDAO<T: NSManagedObject> {
     
     private let coreDataContext: CoreDataContext
     
+    /*!
+    * @brief if this flag is true every core data operation will be saved to the store. If you are not autocommitting you should
+    * call commit() after adding/updating/removing data
+    */
+    public var autocommit = true
+    
     public var entityName:String {
         return self.guessEntityName()
     }
@@ -54,7 +60,7 @@ public class CoreDataDAO<T: NSManagedObject> {
                 managedObject.setValue(nil, forKey: key)
             }
         }
-        try self.coreDataContext.saveContext()
+        try self.saveIfAutocommit()
         guard let managedEntity = managedObject as? T else {
             throw CoreDataKitError.CannotCastManagedObject
         }
@@ -67,7 +73,7 @@ public class CoreDataDAO<T: NSManagedObject> {
             let maybeValue: AnyObject? = map[key]!
             (managedObject as NSManagedObject).setValue(maybeValue, forKey: key)
         }
-        try coreDataContext.saveContext()
+        try self.saveIfAutocommit()
         return managedObject
     }
     
@@ -76,7 +82,7 @@ public class CoreDataDAO<T: NSManagedObject> {
             let maybeValue: AnyObject? = map[key]!
             mo.setValue(maybeValue, forKey: key)
         }
-        try coreDataContext.saveContext()
+        try self.saveIfAutocommit()
     }
 
     private func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [T] {
@@ -155,12 +161,12 @@ public class CoreDataDAO<T: NSManagedObject> {
     
     public func delete(objectId objectId: String) throws {
         try self.coreDataContext.deleteObject(byObjectId: objectId)
-        try self.coreDataContext.saveContext()
+        try self.saveIfAutocommit()
     }
     
     public func delete(object object: NSManagedObject) throws {
         self.coreDataContext.deleteObject(object)
-        try self.coreDataContext.saveContext()
+        try self.saveIfAutocommit()
     }
     
     public func truncate(entityName: String) throws {
@@ -168,7 +174,7 @@ public class CoreDataDAO<T: NSManagedObject> {
         for mo in objects {
             self.coreDataContext.deleteObject(mo)
         }
-        try coreDataContext.saveContext()
+        try self.saveIfAutocommit()
     }
     
     public func findObjectByEntity(entityName: String, withKey key: String, andValue value: String) throws -> T? {
@@ -236,6 +242,20 @@ public class CoreDataDAO<T: NSManagedObject> {
             return result
         } else {
             return [:]
+        }
+    }
+    
+    public func commit() throws {
+        try coreDataContext.saveContext()
+    }
+    
+    public func rollback() {
+        coreDataContext.rollbackContext()
+    }
+    
+    private func saveIfAutocommit() throws {
+        if autocommit {
+            try coreDataContext.saveContext()
         }
     }
     
