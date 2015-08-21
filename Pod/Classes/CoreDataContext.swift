@@ -113,4 +113,8 @@ public class CoreDataContext: NSObject {
     public func rollbackContext() {
         objectContext.rollback()
     }
+    
+    public func reset() {
+        objectContext.reset()
+    }
 }

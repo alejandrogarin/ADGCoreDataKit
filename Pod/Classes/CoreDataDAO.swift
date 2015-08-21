@@ -253,6 +253,10 @@ public class CoreDataDAO<T: NSManagedObject> {
         coreDataContext.rollbackContext()
     }
     
+    public func reset() {
+        coreDataContext.reset()
+    }
+    
     private func saveIfAutocommit() throws {
         if autocommit {
             try coreDataContext.saveContext()
