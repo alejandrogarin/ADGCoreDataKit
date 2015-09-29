@@ -85,8 +85,8 @@ public class CoreDataDAO<T: NSManagedObject> {
         try self.saveIfAutocommit()
     }
 
-    private func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [T] {
-        let list: [AnyObject] = try self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize)
+    private func findObjectsByEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [T] {
+        let list: [AnyObject] = try self.coreDataContext.findObjectsByEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: page, pageSize: pageSize)
         var newArray : [T] = []
         for anyObject in list {
             if let anyObject = anyObject as? T {
@@ -97,23 +97,27 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func findObjectsByEntity(entityName: String) throws -> [T] {
-        return try self.findObjectsByEntity(entityName, sortKey: nil, predicate: nil, page: nil, pageSize: nil)
+        return try self.findObjectsByEntity(entityName, sortKey: nil, ascending: nil, predicate: nil, page: nil, pageSize: nil)
     }
     
     public func findObjectsByEntity(entityName: String, predicate: NSPredicate) throws -> [T] {
-        return try self.findObjectsByEntity(entityName, sortKey: nil, predicate: predicate, page: nil, pageSize: nil)
+        return try self.findObjectsByEntity(entityName, sortKey: nil, ascending: nil, predicate: predicate, page: nil, pageSize: nil)
     }
     
     public func findObjectsByEntity(entityName: String, withSortKey sortKey: String) throws -> [T] {
-        return try self.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: nil, pageSize: nil)
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: nil, page: nil, pageSize: nil)
     }
     
     public func findObjectsByEntity(entityName: String, withSortKey sortKey: String, predicate: NSPredicate) throws -> [T] {
-        return try self.findObjectsByEntity(entityName, sortKey: sortKey, predicate: predicate, page: nil, pageSize: nil)
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: predicate, page: nil, pageSize: nil)
+    }
+    
+    public func findObjectsByEntity(entityName: String, withSortKey sortKey: String, ascending: Bool, predicate: NSPredicate) throws -> [T] {
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: nil, pageSize: nil)
     }
     
     public func findObjectsByEntity(entityName: String, withSortKey sortKey: String, page: Int, pageSize: Int) throws -> [T] {
-        return try self.findObjectsByEntity(entityName, sortKey: sortKey, predicate: nil, page: page, pageSize: pageSize)
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: nil, page: page, pageSize: pageSize)
     }
     
     public func findObjectsByEntity() throws -> [T] {
@@ -133,11 +137,11 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func findObjectsByEntity(sortKey sortKey: String, page: Int, pageSize: Int) throws -> [T] {
-        return try self.findObjectsByEntity(self.entityName, sortKey: sortKey, predicate: nil, page: page, pageSize: pageSize)
+        return try self.findObjectsByEntity(self.entityName, sortKey: sortKey, ascending: true, predicate: nil, page: page, pageSize: pageSize)
     }
     
     public func findObjectsByEntity(sortKey sortKey: String, predicate: NSPredicate, page: Int, pageSize: Int) throws -> [T] {
-        return try self.findObjectsByEntity(self.entityName, sortKey: sortKey, predicate: predicate, page: page, pageSize: pageSize)
+        return try self.findObjectsByEntity(self.entityName, sortKey: sortKey, ascending: true, predicate: predicate, page: page, pageSize: pageSize)
     }
     
     public func findObjectByManagedObjectId(moId moId: NSManagedObjectID) throws ->T {
@@ -182,7 +186,7 @@ public class CoreDataDAO<T: NSManagedObject> {
         let expressionValue = NSExpression(forConstantValue: value)
         let predicate = NSComparisonPredicate(leftExpression: expressionKey, rightExpression: expressionValue, modifier: .DirectPredicateModifier, type: .EqualToPredicateOperatorType, options: .CaseInsensitivePredicateOption)
         
-        let result: [T] = try self.findObjectsByEntity(entityName, sortKey: nil, predicate: predicate, page: nil, pageSize: nil)
+        let result: [T] = try self.findObjectsByEntity(entityName, sortKey: nil, ascending: nil, predicate: predicate, page: nil, pageSize: nil)
         
         return result.first
     }

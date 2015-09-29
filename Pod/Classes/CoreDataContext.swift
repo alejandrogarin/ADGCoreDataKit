@@ -69,10 +69,10 @@ public class CoreDataContext: NSObject {
         return try objectContext.existingObjectWithID(objectId)
     }
 
-    public func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
+    public func findObjectsByEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
         let all = NSFetchRequest()
-        if let sortKey = sortKey {
-            all.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: true)]
+        if let sortKey = sortKey, ascending = ascending {
+            all.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending)]
         }
         if let predicate = predicate {
             all.predicate = predicate
@@ -83,6 +83,10 @@ public class CoreDataContext: NSObject {
             all.fetchOffset = page * pageSize
         }
         return try objectContext.executeFetchRequest(all)
+    }
+    
+    public func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: predicate, page: page, pageSize: pageSize)
     }
     
     public func insertObjectForEntity(entityName : String) -> NSManagedObject {
