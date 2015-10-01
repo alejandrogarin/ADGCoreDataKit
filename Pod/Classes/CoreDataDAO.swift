@@ -96,6 +96,10 @@ public class CoreDataDAO<T: NSManagedObject> {
         return newArray
     }
     
+    public func countObjectsByEntity(entityName: String, predicate: NSPredicate?) throws -> Int {
+        return try self.coreDataContext.countObjectsByEntity(entityName, predicate: predicate)
+    }
+    
     public func findObjectsByEntity(entityName: String) throws -> [T] {
         return try self.findObjectsByEntity(entityName, sortKey: nil, ascending: nil, predicate: nil, page: nil, pageSize: nil)
     }

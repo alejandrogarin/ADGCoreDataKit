@@ -68,21 +68,20 @@ public class CoreDataContext: NSObject {
     public func findObjectById(objectId: NSManagedObjectID) throws -> NSManagedObject {
         return try objectContext.existingObjectWithID(objectId)
     }
-
+    
     public func findObjectsByEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
-        let all = NSFetchRequest()
-        if let sortKey = sortKey, ascending = ascending {
-            all.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending)]
+        let request = self.createFetchRequestForEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: page, pageSize: pageSize)
+        return try objectContext.executeFetchRequest(request)
+    }
+    
+    public func countObjectsByEntity(entityName : String, predicate: NSPredicate?) throws -> Int {
+        let request = self.createFetchRequestForEntity(entityName, sortKey: nil, ascending: nil, predicate: predicate, page: nil, pageSize: nil)
+        var error: NSError?
+        let count = objectContext.countForFetchRequest(request, error: &error)
+        if let error = error {
+            throw error
         }
-        if let predicate = predicate {
-            all.predicate = predicate
-        }
-        all.entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: self.objectContext)
-        if let page = page, pageSize = pageSize {
-            all.fetchLimit = pageSize;
-            all.fetchOffset = page * pageSize
-        }
-        return try objectContext.executeFetchRequest(all)
+        return count
     }
     
     public func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
@@ -120,5 +119,21 @@ public class CoreDataContext: NSObject {
     
     public func reset() {
         objectContext.reset()
+    }
+    
+    private func createFetchRequestForEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) -> NSFetchRequest {
+        let request = NSFetchRequest()
+        if let sortKey = sortKey, ascending = ascending {
+            request.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending)]
+        }
+        if let predicate = predicate {
+            request.predicate = predicate
+        }
+        request.entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: self.objectContext)
+        if let page = page, pageSize = pageSize {
+            request.fetchLimit = pageSize;
+            request.fetchOffset = page * pageSize
+        }
+        return request
     }
 }
