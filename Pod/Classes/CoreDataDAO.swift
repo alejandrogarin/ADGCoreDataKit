@@ -120,6 +120,10 @@ public class CoreDataDAO<T: NSManagedObject> {
         return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: nil, pageSize: nil)
     }
     
+    public func findObjectsByEntity(entityName: String, withSortKey sortKey: String, ascending: Bool, predicate: NSPredicate, page: Int, pageSize: Int) throws -> [T] {
+        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: page, pageSize: pageSize)
+    }
+    
     public func findObjectsByEntity(entityName: String, withSortKey sortKey: String, page: Int, pageSize: Int) throws -> [T] {
         return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: nil, page: page, pageSize: pageSize)
     }
