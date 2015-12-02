@@ -124,7 +124,7 @@ public class CoreDataContext: NSObject {
     private func createFetchRequestForEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) -> NSFetchRequest {
         let request = NSFetchRequest()
         if let sortKey = sortKey, ascending = ascending {
-            request.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending)]
+            request.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending, selector: "localizedCaseInsensitiveCompare:")]
         }
         if let predicate = predicate {
             request.predicate = predicate
