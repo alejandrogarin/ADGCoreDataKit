@@ -11,8 +11,7 @@ Once I have the data I can return DTOs or just simple dictionaries to the applic
 
 #### How do I do that?
 
-In the app I normally create an asyncronous data access "layer". This layer basically hides the implementation details of how the data is stored. It could be CoreData, a remote rest service, local text files, anything. 
-This library is to use CoreData so I have a CoreData DAO where I can interact with the data.
+When writing the application I normally create an asyncronous data access layer, behind this layer I have a CoreData DAO that helps me to interact with the data.
 
 #### Quick example?
 
