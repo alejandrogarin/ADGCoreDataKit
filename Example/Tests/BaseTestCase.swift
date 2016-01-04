@@ -53,8 +53,9 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         do {
-            self.coreDataManager = try CoreDataManager(usingModelName: "TestModel", sqlFileName: nil, inBundle:NSBundle(forClass: BaseTestCase.self),  securityApplicationGroup: nil, enableCloud: false)
-            self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", sqlFileName: nil, inBundle:NSBundle(forClass: BaseTestCase.self),  securityApplicationGroup: nil, enableCloud: false)
+            try self.coreDataManager.setupCoreDataStack()
+            self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator!, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
             
             self.audioDAO = AudioDAO(usingContext: self.coreDataContext)
             self.playlistDAO = PlaylistDAO(usingContext: self.coreDataContext)
@@ -68,6 +69,11 @@ class BaseTestCase: XCTestCase {
     
     override func tearDown() {
         super.tearDown()
+        do {
+            try self.coreDataManager.shutdownCoreDataStack()
+        } catch let error as NSError {
+            XCTFail("\(error)")
+        }
     }
     
     func testTruncate() {

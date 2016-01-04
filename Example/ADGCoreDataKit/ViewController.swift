@@ -18,15 +18,16 @@ class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
 
 class ViewController: UITableViewController {
     
-    var coreData:CoreDataManager?
+    var coreData:CoreDataManager!
     var datasource: [[String:Any]] = []
     var dao: ManagedObjectDAO!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.coreData = try! CoreDataManager(usingModelName: "Model")
-        let context = CoreDataContext(usingPersistentStoreCoordinator: self.coreData!.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+        self.coreData = CoreDataManager(usingModelName: "Model")
+        try! self.coreData.setupCoreDataStack()
+        let context = CoreDataContext(usingPersistentStoreCoordinator: self.coreData.persistentStoreCoordinator!, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
         
         self.dao = ManagedObjectDAO(usingContext: context)
         
@@ -44,7 +45,7 @@ class ViewController: UITableViewController {
         print("----- create an array of dictionary elements representing the retrieved managed objects ----")
         self.datasource = self.dao.managedObjectsToDictionary(result)
         print(self.datasource)
-        
+                
         self.tableView.reloadData()
     }
     
