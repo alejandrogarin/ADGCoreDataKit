@@ -6,12 +6,13 @@ I wanted to use CoreData without exposing it to the application. Meaning that Vi
 
 #### So?
 
-When creating, updating, deleting and finding objects I just want see CoreData as a DAO with useful methods to interact with.
+When creating, updating, deleting and finding objects I just want to see CoreData as a DAO with useful methods to interact with.
 Once I have the data I can return DTOs or just simple dictionaries to the application.
 
 #### How do I do that?
 
-In the app I create an asyncronous data access "layer". This layer basically hides the implementation details of how the data is stored. It could be CoreData, a remote rest service, local text files, anything.
+In the app I normally create an asyncronous data access "layer". This layer basically hides the implementation details of how the data is stored. It could be CoreData, a remote rest service, local text files, anything. 
+This library is to use CoreData so I have a CoreData DAO where I can interact with the data.
 
 #### Quick example?
 
