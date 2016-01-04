@@ -1,64 +1,50 @@
-# ADGCoreDataKit
+## Intro
 
-## Requirement
+#### Why did I create this library?
 
-Swift 2.0 SDK beta 4
+I wanted to use CoreData without exposing it to the application. Meaning that ViewControllers will not know anything about CoreData. I wanted CoreData to be simple.
 
-A set of classes for easy to use CoreData
+#### So?
 
-## Examples
+When creating, updating, deleting and finding objects I just want see CoreData as a DAO with useful methods to interact with.
+Once I have the data I can return DTOs or just simple dictionaries to the application.
 
-#### Without subclassing NSManagedObject
+#### How do I do that?
 
-##### 1. Add a row and popuplate the UITableView
+In the app I create an asyncronous data access "layer". This layer basically hides the implementation details of how the data is stored. It could be CoreData, a remote rest service, local text files, anything.
 
-Given this model
-
-![Example1](Model.png)
-
-This is the minimum amount of code to show the rows inserted in a table. This example doesn't need any NSManagedObject subclass
+#### Quick example?
 
 ```swift
 
+// without subclassing NSManagedObject
+
 class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
-    override init(usingContext context: CoreDataContext) {
-        super.init(usingContext: context)
-    }
 }
 
-class ViewController: UITableViewController {
+let managedObject = try dao.insert(entityName: "Car", map: ["name": "Mercedes"])
+let cars = try dao.findObjectsByEntity("Car", withSortKey: "name")
+try self.dao.delete(object: managedObject)
 
-    var coreData:CoreDataManager?
-    var datasource: [[String:Any]] = []
-    var dao: ManagedObjectDAO!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        self.coreData = try! CoreDataManager(usingModelName: "Model")
-        let context = CoreDataContext(usingPersistentStoreCoordinator: self.coreData!.persistentStoreCoordinator, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
-        
-        self.dao = ManagedObjectDAO(usingContext: context)
-        
-        print("----- empty the table ----")
-        try! self.dao.truncate("TableA")
-        
-        print("----- insert some rows ----")
-        for (var i=0; i < 10; i++) {
-            try! self.dao.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i])
-        }
-        print("----- get the array of managed object ----")
-        let result = try! self.dao.findObjectsByEntity("TableA")
-        
-        print("----- create an array of dictionary elements representing the retrieved managed objects ----")
-        self.datasource = self.dao.managedObjectsToDictionary(result)
-        
-        self.tableView.reloadData()
-    }
+// subclassing NSManagedObject
+
+class ManagedObjectDAO: CoreDataDAO<Car> {
 }
+
+let car: Car = try self.dao.insert(map: ["name": "Mercedes"])
+let cars = try dao.findObjectsByEntity(sortKey: "name")
+try self.dao.delete(object: car)
+
 
 ```
 
-#### Subclassing NSManagedObject
+#### What should I do next?
+
+The data access layer will have some methods with input parameters (or DTOs) and probably will return DTOs in response. 
+This is specific to your application but I usually create DTOs representations of my database model and return that information to the app depending of the method that is being called.
+At this point this is very similar of writing the server side module of your app, but in this case there is no server, just CoreData behind an interface.
+
+## Content
 
 TODO
