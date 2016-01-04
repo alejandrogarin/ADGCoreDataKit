@@ -11,7 +11,8 @@ Once I have the data I can return DTOs or just simple dictionaries to the applic
 
 #### How do I do that?
 
-When writing the application I normally create an asyncronous data access layer, behind this layer I have a CoreData DAO that helps me to interact with the data.
+When writing the application I normally create an asyncronous data access layer, behind this layer I have a CoreData DAO that helps me to interact with the data. 
+This is exactly what you do when interacting with a remote rest service, you have an asyncronous call that returns data, right?
 
 #### Quick example?
 
