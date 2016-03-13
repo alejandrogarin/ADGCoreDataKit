@@ -10,9 +10,29 @@ import UIKit
 import CoreData
 import ADGCoreDataKit
 
+enum CoreDataKitKeys: String {
+    case ObjectId = "_core_data_object_id"
+}
+
 class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
     override init(usingContext context: CoreDataContext) {
         super.init(usingContext: context)
+    }
+    
+    func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
+        var result:[[String:Any]] = []
+        for object in managedObjects {
+            var dtoMap: [String: Any] = [:]
+            let valuesForKey = object.committedValuesForKeys(nil)
+            for key in valuesForKey.keys {
+                if let value:AnyObject = object.valueForKey(key) {
+                    dtoMap[key] = value
+                }
+            }
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
+            result.append(dtoMap)
+        }
+        return result
     }
 }
 

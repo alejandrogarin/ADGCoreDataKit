@@ -89,7 +89,7 @@ class RawTests: BaseTestCase {
         do {
             var mo: NSManagedObject?
             mo = try self.insertPlaylistManagedObject("play1", order: 0);
-            let dto: [String: Any] = self.dao.managedObjectToDictionary(mo!)
+            let dto: [String: Any] = self.managedObjectToDictionary(mo!)
             XCTAssertNotNil(dto["name"] as? String)
         } catch {
             XCTFail()
@@ -101,7 +101,7 @@ class RawTests: BaseTestCase {
             let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
             try self.dao.update(managedObject: playlist, map: ["order": 1, "name": nil])
             let updatedPlaylist = try self.dao.findObjectByManagedObjectId(moId: playlist.objectID)
-            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedPlaylist)
+            let dto: [String: Any] = self.managedObjectToDictionary(updatedPlaylist)
             XCTAssertNotNil(dto["order"] as? Int)
             XCTAssertTrue(dto["name"] == nil)
             XCTAssertEqual(dto["order"] as! Int, 1)
@@ -115,7 +115,7 @@ class RawTests: BaseTestCase {
             let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
             try self.dao.update(managedObject: playlist, map: ["name": nil])
             let updatedPlaylist = try self.dao.findObjectByManagedObjectId(moId: playlist.objectID)
-            let dto: [String: Any] = self.dao.managedObjectToDictionary(updatedPlaylist)
+            let dto: [String: Any] = self.managedObjectToDictionary(updatedPlaylist)
             XCTAssertNil(dto["name"] as? String)
         } catch {
             XCTFail()
@@ -141,8 +141,9 @@ class RawTests: BaseTestCase {
             XCTAssertEqual(1, list.count)
             let object: NSManagedObject? = list.first
             if let object = object {
-                let dto: [String:Any] = self.dao.managedObjectToDictionary(object)
-                XCTAssertEqual(dto["name"] as! String, "play1")
+                let dto: [String:Any] = self.managedObjectToDictionary(object)
+                let name = dto["name"] as! String
+                XCTAssertEqual(name, "play1")
             }
         } catch {
             XCTFail()

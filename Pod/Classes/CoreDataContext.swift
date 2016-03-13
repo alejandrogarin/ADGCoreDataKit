@@ -113,6 +113,10 @@ public class CoreDataContext: NSObject {
         objectContext.reset()
     }
     
+    public func performBlock(block: () -> Void) {
+        objectContext.performBlock(block)
+    }
+    
     public func managedObjectIdFromStringObjectId(objectId: String) throws -> NSManagedObjectID {
         guard let url = NSURL(string: objectId), managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
             throw CoreDataKitError.ManagedObjectIdNotFound

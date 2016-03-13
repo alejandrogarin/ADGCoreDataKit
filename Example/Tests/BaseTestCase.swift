@@ -30,6 +30,10 @@ import XCTest
 import ADGCoreDataKit
 import CoreData
 
+enum CoreDataKitKeys: String {
+    case ObjectId = "_core_data_object_id"
+}
+
 class AudioDAO: CoreDataDAO<Audio> {
     override init(usingContext context: CoreDataContext) {
         super.init(usingContext: context)
@@ -109,6 +113,53 @@ class BaseTestCase: XCTestCase {
         let audio: Audio = try self.audioDAO.insert(map: map)
         XCTAssertNotNil(audio)
         return audio;
+    }
+    
+    func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
+        var result:[[String:Any]] = []
+        for object in managedObjects {
+            var dtoMap: [String: Any] = [:]
+            for key in keys {
+                if let value:AnyObject = object.valueForKey(key) {
+                    dtoMap[key] = value
+                }
+            }
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
+            result.append(dtoMap)
+        }
+        return result
+    }
+    
+    func managedObjectToDictionary(managedObject: NSManagedObject, keys:[String]) -> [String:Any] {
+        if let result = self.managedObjectsToDictionary([managedObject], keys: keys).first {
+            return result
+        } else {
+            return [:]
+        }
+    }
+    
+    func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
+        var result:[[String:Any]] = []
+        for object in managedObjects {
+            var dtoMap: [String: Any] = [:]
+            let valuesForKey = object.committedValuesForKeys(nil)
+            for key in valuesForKey.keys {
+                if let value:AnyObject = object.valueForKey(key) {
+                    dtoMap[key] = value
+                }
+            }
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
+            result.append(dtoMap)
+        }
+        return result
+    }
+    
+    func managedObjectToDictionary(managedObject: NSManagedObject) -> [String:Any] {
+        if let result = self.managedObjectsToDictionary([managedObject]).first {
+            return result
+        } else {
+            return [:]
+        }
     }
 
 }

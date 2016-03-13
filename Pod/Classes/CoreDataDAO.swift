@@ -203,51 +203,8 @@ public class CoreDataDAO<T: NSManagedObject> {
         return absURL;
     }
     
-    public func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
-        var result:[[String:Any]] = []
-        for object in managedObjects {
-            var dtoMap: [String: Any] = [:]
-            for key in keys {
-                if let value:AnyObject = object.valueForKey(key) {
-                    dtoMap[key] = value
-                }
-            }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
-            result.append(dtoMap)
-        }
-        return result
-    }
-    
-    public func managedObjectToDictionary(managedObject: NSManagedObject, keys:[String]) -> [String:Any] {
-        if let result = self.managedObjectsToDictionary([managedObject], keys: keys).first {
-            return result
-        } else {
-            return [:]
-        }
-    }
-    
-    public func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
-        var result:[[String:Any]] = []
-        for object in managedObjects {
-            var dtoMap: [String: Any] = [:]
-            let valuesForKey = object.committedValuesForKeys(nil)
-            for key in valuesForKey.keys {
-                if let value:AnyObject = object.valueForKey(key) {
-                    dtoMap[key] = value
-                }
-            }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
-            result.append(dtoMap)
-        }
-        return result
-    }
-    
-    public func managedObjectToDictionary(managedObject: NSManagedObject) -> [String:Any] {
-        if let result = self.managedObjectsToDictionary([managedObject]).first {
-            return result
-        } else {
-            return [:]
-        }
+    public func performBlock(block: () -> Void) {
+        coreDataContext.performBlock(block)
     }
     
     public func commit() throws {

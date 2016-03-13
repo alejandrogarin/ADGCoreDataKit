@@ -35,10 +35,6 @@ public enum CoreDataKitError: ErrorType {
     case CannotCastManagedObject
 }
 
-public enum CoreDataKitKeys: String {
-    case ObjectId = "_core_data_object_id"
-}
-
 public protocol CoreDataManagerDelegate: class {
     func coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification: NSNotification)
     func coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(transition: NSPersistentStoreUbiquitousTransitionType)
