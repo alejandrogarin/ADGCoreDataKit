@@ -31,7 +31,6 @@ import CoreData
 public enum CoreDataKitError: ErrorType {
     case CannotFindObjectModel(name: String, bundle: NSBundle)
     case CannotCreateManagedModelObject(path: String)
-    case InvalidManagedObjectIdString
     case ManagedObjectIdNotFound
     case CannotCastManagedObject
 }

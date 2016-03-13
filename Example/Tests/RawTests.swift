@@ -127,7 +127,7 @@ class RawTests: BaseTestCase {
             let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
             try self.dao.update(managedObject: playlist, map: ["order": 1])
             try self.dao.findObjectById(objectId: "The invalid object id 123455")
-        } catch CoreDataKitError.InvalidManagedObjectIdString {
+        } catch CoreDataKitError.ManagedObjectIdNotFound {
             XCTAssertTrue(true)
         } catch {
             XCTFail()

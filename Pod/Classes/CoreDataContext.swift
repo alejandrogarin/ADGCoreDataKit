@@ -93,16 +93,8 @@ public class CoreDataContext: NSObject {
     }
     
     public func deleteObject(byObjectId objectId: String) throws {
-        
-        guard let url = NSURL(string: objectId) else {
-            throw CoreDataKitError.InvalidManagedObjectIdString
-        }
-        
-        guard let objectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
-            throw CoreDataKitError.ManagedObjectIdNotFound
-        }
-        
-        try self.deleteObject(self.findObjectById(objectId))
+        let managedObjectId = try self.managedObjectIdFromStringObjectId(objectId)
+        try self.deleteObject(self.findObjectById(managedObjectId))
     }
     
     public func deleteObject(managedObject : NSManagedObject) -> Void {
@@ -119,6 +111,13 @@ public class CoreDataContext: NSObject {
     
     public func reset() {
         objectContext.reset()
+    }
+    
+    public func managedObjectIdFromStringObjectId(objectId: String) throws -> NSManagedObjectID {
+        guard let url = NSURL(string: objectId), managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
+            throw CoreDataKitError.ManagedObjectIdNotFound
+        }
+        return managedObjectId;
     }
     
     private func createFetchRequestForEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) -> NSFetchRequest {

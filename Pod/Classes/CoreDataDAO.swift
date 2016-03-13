@@ -160,15 +160,8 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func findObjectById(objectId objectId: String) throws -> T {
-        guard let url = NSURL(string: objectId) else {
-            throw CoreDataKitError.InvalidManagedObjectIdString
-        }
-        
-        guard let objectId = self.coreDataContext.persistentCoordinator.managedObjectIDForURIRepresentation(url) else {
-            throw CoreDataKitError.ManagedObjectIdNotFound
-        }
-        
-        return try self.findObjectByManagedObjectId(moId: objectId)
+        let managedObjectId = try self.coreDataContext.managedObjectIdFromStringObjectId(objectId)
+        return try self.findObjectByManagedObjectId(moId: managedObjectId)
     }
     
     public func delete(objectId objectId: String) throws {
