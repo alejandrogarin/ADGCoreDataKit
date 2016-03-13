@@ -104,7 +104,7 @@ class RawTests: BaseTestCase {
             let dto: [String: Any] = self.managedObjectToDictionary(updatedPlaylist)
             XCTAssertNotNil(dto["order"] as? Int)
             XCTAssertTrue(dto["name"] == nil)
-            XCTAssertEqual(dto["order"] as! Int, 1)
+            XCTAssertEqual((dto["order"] as? Int)!, 1)
         } catch {
             XCTFail()
         }
@@ -191,16 +191,16 @@ class RawTests: BaseTestCase {
             XCTAssertEqual(arrayPage10.count, 0)
             var object1: NSManagedObject = arrayPage0.first! as! NSManagedObject
             var object10: NSManagedObject = arrayPage0.last! as! NSManagedObject
-            XCTAssertEqual(object1.valueForKey("name") as! String, "play 0")
-            XCTAssertEqual(object10.valueForKey("name") as! String, "play 9")
+            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 0")
+            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 9")
             object1 = arrayPage1.first! as! NSManagedObject
             object10 = arrayPage1.last! as! NSManagedObject
-            XCTAssertEqual(object1.valueForKey("name") as! String, "play 10")
-            XCTAssertEqual(object10.valueForKey("name") as! String, "play 19")
+            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 10")
+            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 19")
             object1 = arrayPage9.first! as! NSManagedObject
             object10 = arrayPage9.last! as! NSManagedObject
-            XCTAssertEqual(object1.valueForKey("name") as! String, "play 90")
-            XCTAssertEqual(object10.valueForKey("name") as! String, "play 99")
+            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 90")
+            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 99")
         } catch {
             XCTFail()
         }
