@@ -50,6 +50,7 @@ public class CoreDataManager: NSObject {
     let appGroup: String?
     let bundle: NSBundle
     let sqlFileName: String?
+    var useInMemoryStore: Bool = false
     var objectModel : NSManagedObjectModel?
     
     public init(usingModelName modelName: String, sqlFileName: String?, inBundle bundle: NSBundle?, securityApplicationGroup appGroup: String?, enableCloud: Bool) {
@@ -76,12 +77,23 @@ public class CoreDataManager: NSObject {
     public convenience init(usingModelName modelName: String, enableCloud : Bool) {
         self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:enableCloud)
     }
+    
+    public convenience init(usingInMemoryStoreWithModelName modelName: String, inBundle bundle: NSBundle?) {
+        self.init(usingModelName: modelName, sqlFileName: nil, inBundle: nil, securityApplicationGroup:nil, enableCloud:false)
+        self.useInMemoryStore = true
+    }
+    
         
     public func setupCoreDataStack() throws {
-        self.persistentStoreCoordinator = try self.createPersistentStoreCoordinator()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "persistentStoreCoordinatorStoresDidChangeNotification:", name: NSPersistentStoreCoordinatorStoresDidChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "persistentStoreCoordinatorStoresWillChangeNotification:", name: NSPersistentStoreCoordinatorStoresWillChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "persistentStoreDidImportUbiquitousContentChangesNotification:", name: NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: self.persistentStoreCoordinator)
+        if self.useInMemoryStore {
+            self.persistentStoreCoordinator = try self.createInMemoryPersistentStoreCoordinator()
+        } else {
+            self.persistentStoreCoordinator = try self.createPersistentStoreCoordinator()
+        }
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSPersistentStoreCoordinatorStoresDidChangeNotification, object: self.persistentStoreCoordinator)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:
+            #selector(persistentStoreCoordinatorStoresWillChangeNotification), name: NSPersistentStoreCoordinatorStoresWillChangeNotification, object: self.persistentStoreCoordinator)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: self.persistentStoreCoordinator)
     }
     
     public func shutdownCoreDataStack() throws {
@@ -94,21 +106,18 @@ public class CoreDataManager: NSObject {
     }
     
     func persistentStoreCoordinatorStoresDidChangeNotification(notification: NSNotification) {
-        NSLog("%@:%@", String(self), __FUNCTION__)
         if let userInfo = notification.userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
             self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(enumType)
         }
     }
     
     func persistentStoreCoordinatorStoresWillChangeNotification(notification: NSNotification) {
-        NSLog("%@:%@", String(self), __FUNCTION__)
         if let userInfo = notification.userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
             self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(enumType)
         }
     }
     
     func persistentStoreDidImportUbiquitousContentChangesNotification(notification: NSNotification) {
-        NSLog("%@:%@", String(self), __FUNCTION__)
         self.delegate?.coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification)
     }
     
@@ -150,11 +159,17 @@ public class CoreDataManager: NSObject {
         
         return managedObjectModel
     }
+
+    private func createInMemoryPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
+        self.objectModel = try createManagedObjectModel()
+        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!)
+        try storeCoordinator.addPersistentStoreWithType(NSInMemoryStoreType, configuration: nil, URL: nil, options: nil)
+        return storeCoordinator
+    }
     
     private func createPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
         var storeOptions: [NSObject : AnyObject]? = nil
         if (self.icloud) {
-            NSLog("%@:%@ - creating an iCloud enabled persistent store", String(self), __FUNCTION__)
             storeOptions = [NSPersistentStoreUbiquitousContentNameKey:"container_\(self.modelName)", NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
         } else {
             //TODO: allow setting this in a property
