@@ -1,6 +1,0 @@
-framework module Pods_ADGCoreDataKit_Tests {
-  umbrella header "Pods-ADGCoreDataKit_Tests-umbrella.h"
-
-  export *
-  module * { export * }
-}
