@@ -48,8 +48,8 @@ public class CoreDataContext: NSObject {
         objectContext.persistentStoreCoordinator = storeCoordinator
         super.init()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "objectsDidChangeNotification:", name: NSManagedObjectContextObjectsDidChangeNotification, object: objectContext)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "objectContextDidSaveNotification:", name: NSManagedObjectContextDidSaveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(objectsDidChangeNotification), name: NSManagedObjectContextObjectsDidChangeNotification, object: objectContext)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(objectContextDidSaveNotification), name: NSManagedObjectContextDidSaveNotification, object: nil)
     }
     
     deinit {
