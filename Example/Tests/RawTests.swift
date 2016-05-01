@@ -67,7 +67,7 @@ class RawTests: BaseTestCase {
     
     func testInsertPlaylistUsingDAO() {
         do {
-            let map: [String: AnyObject] = ["name": name]
+            let map: [String: AnyObject] = ["name": "the name"]
             try self.dao.insert(entityName: "Playlist", map: map)
             let count = try self.dao.findObjectsByEntity("Playlist").count
             XCTAssertEqual(1, count)
@@ -152,10 +152,10 @@ class RawTests: BaseTestCase {
     
     func testFindAllPlaylists() {
         do {
-            for (var i:Int = 0; i < 100; i++) {
+            for i in 0 ..< 100 {
                 try self.insertPlaylist("play \(i)", order: i)
             }
-            let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: nil, page: nil, pageSize: nil)
+            let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: nil, sortDescriptors: nil, page: nil, pageSize: nil)
             XCTAssertEqual(array.count, 100)
         } catch {
             XCTFail()
@@ -164,11 +164,11 @@ class RawTests: BaseTestCase {
     
     func testFindPlaylistWithPredicate() {
         do {
-            for (var i:Int = 0; i < 100; i++) {
+            for i in 0 ..< 100 {
                 try self.insertPlaylist("play \(i)", order: i)
             }
             let predicate = NSPredicate(format: "name CONTAINS %@", "play 2")
-            let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: nil, predicate: predicate, page: nil, pageSize: nil)
+            let array: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: predicate, sortDescriptors: nil, page: nil, pageSize: nil)
             XCTAssertEqual(array.count, 11)
         } catch {
             XCTFail()
@@ -177,14 +177,16 @@ class RawTests: BaseTestCase {
     
     func testFindPlaylistWithPaggingAndOrder() {
         do {
-            for (var i:Int = 0; i < 100; i++) {
+            for i in 0 ..< 100 {
                 try self.insertPlaylist("play \(i)", order: i)
             }
             
-            let arrayPage0: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 0, pageSize: 10)
-            let arrayPage1: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 1, pageSize: 10)
-            let arrayPage9: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 9, pageSize: 10)
-            let arrayPage10: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", sortKey: "order", predicate: nil, page: 10, pageSize: 10)
+            let descriptor = [NSSortDescriptor(key: "order", ascending: true)]
+            
+            let arrayPage0: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: nil, sortDescriptors: descriptor, page: 0, pageSize: 10)
+            let arrayPage1: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: nil, sortDescriptors: descriptor, page: 1, pageSize: 10)
+            let arrayPage9: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: nil, sortDescriptors: descriptor, page: 9, pageSize: 10)
+            let arrayPage10: [AnyObject] = try self.coreDataContext.findObjectsByEntity("Playlist", predicate: nil, sortDescriptors: descriptor, page: 10, pageSize: 10)
             XCTAssertEqual(arrayPage0.count, 10)
             XCTAssertEqual(arrayPage1.count, 10)
             XCTAssertEqual(arrayPage9.count, 10)

@@ -55,7 +55,7 @@ class ViewController: UITableViewController {
         try! self.dao.truncate("TableA")
         
         print("----- insert some rows ----")
-        for (var i=0; i < 10; i++) {
+        for i in 0..<10 {
             try! self.dao.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i])
         }
         print("----- get the array of managed object ----")

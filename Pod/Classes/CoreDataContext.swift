@@ -69,13 +69,13 @@ public class CoreDataContext: NSObject {
         return try objectContext.existingObjectWithID(objectId)
     }
     
-    public func findObjectsByEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
-        let request = self.createFetchRequestForEntity(entityName, sortKey: sortKey, ascending: ascending, predicate: predicate, page: page, pageSize: pageSize)
+    public func findObjectsByEntity(entityName : String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
+        let request = self.createFetchRequestForEntity(entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
         return try objectContext.executeFetchRequest(request)
     }
-    
+        
     public func countObjectsByEntity(entityName : String, predicate: NSPredicate?) throws -> Int {
-        let request = self.createFetchRequestForEntity(entityName, sortKey: nil, ascending: nil, predicate: predicate, page: nil, pageSize: nil)
+        let request = self.createFetchRequestForEntity(entityName, predicate: predicate, sortDescriptors: nil, page: nil, pageSize: nil)
         var error: NSError?
         let count = objectContext.countForFetchRequest(request, error: &error)
         if let error = error {
@@ -83,11 +83,7 @@ public class CoreDataContext: NSObject {
         }
         return count
     }
-    
-    public func findObjectsByEntity(entityName : String, sortKey: String?, predicate: NSPredicate?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
-        return try self.findObjectsByEntity(entityName, sortKey: sortKey, ascending: true, predicate: predicate, page: page, pageSize: pageSize)
-    }
-    
+        
     public func insertObjectForEntity(entityName : String) -> NSManagedObject {
         return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
     }
@@ -124,14 +120,10 @@ public class CoreDataContext: NSObject {
         return managedObjectId;
     }
     
-    private func createFetchRequestForEntity(entityName : String, sortKey: String?, ascending: Bool?, predicate: NSPredicate?, page: Int?, pageSize: Int?) -> NSFetchRequest {
+    private func createFetchRequestForEntity(entityName : String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, page: Int?, pageSize: Int?) -> NSFetchRequest {
         let request = NSFetchRequest()
-        if let sortKey = sortKey, ascending = ascending {
-            request.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending, selector: "localizedCaseInsensitiveCompare:")]
-        }
-        if let predicate = predicate {
-            request.predicate = predicate
-        }
+        request.sortDescriptors = sortDescriptors
+        request.predicate = predicate
         request.entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: self.objectContext)
         if let page = page, pageSize = pageSize {
             request.fetchLimit = pageSize;
