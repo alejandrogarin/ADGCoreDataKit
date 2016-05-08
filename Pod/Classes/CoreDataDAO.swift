@@ -84,8 +84,10 @@ public class CoreDataDAO<T: NSManagedObject> {
         }
         try self.saveIfAutocommit()
     }
-
-    //[NSSortDescriptor(key: sortKey, ascending: ascending, selector: "localizedCaseInsensitiveCompare:")]
+    
+    public func hasChanges() -> Bool {
+        return self.coreDataContext.hasChanges()
+    }
     
     private func findObjectsByEntity(entityName : String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, page: Int?, pageSize: Int?) throws -> [T] {
         let list: [AnyObject] = try self.coreDataContext.findObjectsByEntity(entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)

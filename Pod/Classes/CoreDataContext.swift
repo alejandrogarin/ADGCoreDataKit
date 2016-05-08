@@ -109,6 +109,10 @@ public class CoreDataContext: NSObject {
         objectContext.reset()
     }
     
+    public func hasChanges() -> Bool {
+        return objectContext.hasChanges
+    }
+    
     public func performBlock(block: () -> Void) {
         objectContext.performBlock(block)
     }
