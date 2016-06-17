@@ -68,13 +68,16 @@ public class CoreDataDAO<T: NSManagedObject> {
     }
     
     public func update(objectId objectId: String, map: [String:AnyObject?]) throws -> T {
-        let managedObject: T = try self.findObjectById(objectId: objectId)
+        let managedObject = try self.findObjectById(objectId: objectId)
         for key in map.keys {
             let maybeValue: AnyObject? = map[key]!
             (managedObject as NSManagedObject).setValue(maybeValue, forKey: key)
         }
         try self.saveIfAutocommit()
-        return managedObject
+        guard let managedEntity = managedObject as? T else {
+            throw CoreDataKitError.CannotCastManagedObject
+        }
+        return managedEntity
     }
     
     public func update(managedObject mo: NSManagedObject, map: [String:AnyObject?]) throws {
@@ -110,6 +113,13 @@ public class CoreDataDAO<T: NSManagedObject> {
     
     public func countObjectsByEntity(entityName: String, predicate: NSPredicate?) throws -> Int {
         return try self.coreDataContext.countObjectsByEntity(entityName, predicate: predicate)
+    }
+    
+    public func find(byId: String) throws -> T {
+        guard let object = try self.findObjectById(objectId: byId) as? T else {
+            throw CoreDataKitError.CannotCastManagedObject
+        }
+        return object
     }
     
     public func findObjectsByEntity(entityName: String) throws -> [T] {
@@ -172,14 +182,11 @@ public class CoreDataDAO<T: NSManagedObject> {
         return try self.findObjectsByEntity(self.entityName, predicate: predicate, sortKey: sortKey, ascending: true, page: page, pageSize: pageSize)
     }
     
-    public func findObjectByManagedObjectId(moId moId: NSManagedObjectID) throws ->T {
-        guard let object = try self.coreDataContext.findObjectById(moId) as? T else {
-            throw CoreDataKitError.CannotCastManagedObject
-        }
-        return object
+    public func findObjectByManagedObjectId(moId moId: NSManagedObjectID) throws -> NSManagedObject {
+        return try self.coreDataContext.findObjectById(moId)
     }
     
-    public func findObjectById(objectId objectId: String) throws -> T {
+    public func findObjectById(objectId objectId: String) throws -> NSManagedObject {
         let managedObjectId = try self.coreDataContext.managedObjectIdFromStringObjectId(objectId)
         return try self.findObjectByManagedObjectId(moId: managedObjectId)
     }

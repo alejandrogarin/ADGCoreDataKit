@@ -50,14 +50,15 @@ public class CoreDataManager: NSObject {
     let appGroup: String?
     let bundle: NSBundle
     let sqlFileName: String?
-    var useInMemoryStore: Bool = false
+    let useInMemoryStore: Bool
     var objectModel : NSManagedObjectModel?
     
-    public init(usingModelName modelName: String, sqlFileName: String?, inBundle bundle: NSBundle?, securityApplicationGroup appGroup: String?, enableCloud: Bool) {
+    public init(usingModelName modelName: String, sqlFileName: String? = nil, inBundle bundle: NSBundle? = nil, securityApplicationGroup appGroup: String? = nil, enableCloud: Bool = false, useInMemoryStore: Bool = false) {
         self.modelName = modelName
         self.appGroup = appGroup
         self.icloud = enableCloud
         self.sqlFileName = sqlFileName
+        self.useInMemoryStore = useInMemoryStore
         if let bundle = bundle {
             self.bundle = bundle
         } else {
@@ -65,24 +66,6 @@ public class CoreDataManager: NSObject {
         }
         super.init()
     }
-    
-    public convenience init(usingModelName modelName: String, securityApplicationGroup appGroup : String?, enableCloud : Bool) {
-        self.init(usingModelName: modelName, sqlFileName: nil, inBundle: nil, securityApplicationGroup:appGroup, enableCloud:enableCloud)
-    }
-    
-    public convenience init(usingModelName modelName: String) {
-        self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:false)
-    }
-    
-    public convenience init(usingModelName modelName: String, enableCloud : Bool) {
-        self.init(usingModelName: modelName, securityApplicationGroup:nil, enableCloud:enableCloud)
-    }
-    
-    public convenience init(usingInMemoryStoreWithModelName modelName: String, inBundle bundle: NSBundle?) {
-        self.init(usingModelName: modelName, sqlFileName: nil, inBundle: nil, securityApplicationGroup:nil, enableCloud:false)
-        self.useInMemoryStore = true
-    }
-    
         
     public func setupCoreDataStack() throws {
         if self.useInMemoryStore {
