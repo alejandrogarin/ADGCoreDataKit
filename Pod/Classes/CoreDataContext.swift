@@ -42,7 +42,7 @@ public class CoreDataContext: NSObject {
     
     public weak var delegate : CoreDataContextDelegate?
     
-    public init(usingPersistentStoreCoordinator storeCoordinator : NSPersistentStoreCoordinator, concurrencyType type : NSManagedObjectContextConcurrencyType) {
+    internal init(usingPersistentStoreCoordinator storeCoordinator : NSPersistentStoreCoordinator, concurrencyType type : NSManagedObjectContextConcurrencyType) {
         persistentCoordinator = storeCoordinator
         objectContext = NSManagedObjectContext(concurrencyType: type)
         objectContext.persistentStoreCoordinator = storeCoordinator

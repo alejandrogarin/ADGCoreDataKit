@@ -115,7 +115,7 @@ public class CoreDataDAO<T: NSManagedObject> {
         return try self.coreDataContext.countObjectsByEntity(entityName, predicate: predicate)
     }
     
-    public func find(byId: String) throws -> T {
+    public func find(byId byId: String) throws -> T {
         guard let object = try self.findObjectById(objectId: byId) as? T else {
             throw CoreDataKitError.CannotCastManagedObject
         }

@@ -98,7 +98,7 @@ class ModelTests: BaseTestCase {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
             let objectId = CoreDataDAO.stringObjectId(fromMO: playlist)
-            let retrieved: Playlist = try self.playlistDAO.findObjectById(objectId: objectId)
+            let retrieved: Playlist = try self.playlistDAO.find(byId: objectId)
             if let name = retrieved.name {
                 XCTAssertEqual(name, "play1")
             } else {
@@ -112,7 +112,7 @@ class ModelTests: BaseTestCase {
     func testGetPlaylistUsingManagedObjectId() {
         do {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let retrived: Playlist = try self.playlistDAO.findObjectByManagedObjectId(moId: playlist.objectID)
+            let retrived: Playlist = try self.playlistDAO.findObjectByManagedObjectId(moId: playlist.objectID) as! Playlist
             if let name = retrived.name {
                 XCTAssertEqual(name, "play1")
             } else {
@@ -125,7 +125,7 @@ class ModelTests: BaseTestCase {
     
     func testFindAllPlaylists() {
         do {
-            for (var i = 0; i < 100; i++) {
+            for i in 0..<100 {
                 try self.insertPlaylist("play \(i)")
             }
             let result:[Playlist] = try self.playlistDAO.findObjectsByEntity()

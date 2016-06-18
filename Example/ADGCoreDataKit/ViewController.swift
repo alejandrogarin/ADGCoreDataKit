@@ -47,7 +47,7 @@ class ViewController: UITableViewController {
         
         self.coreData = CoreDataManager(usingModelName: "Model")
         try! self.coreData.setupCoreDataStack()
-        let context = CoreDataContext(usingPersistentStoreCoordinator: self.coreData.persistentStoreCoordinator!, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+        let context = self.coreData.makeContext(associateWithMainQueue: true)
         
         self.dao = ManagedObjectDAO(usingContext: context)
         

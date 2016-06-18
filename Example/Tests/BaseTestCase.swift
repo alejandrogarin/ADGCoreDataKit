@@ -34,22 +34,10 @@ enum CoreDataKitKeys: String {
     case ObjectId = "_core_data_object_id"
 }
 
-class AudioDAO: CoreDataDAO<Audio> {
-    override init(usingContext context: CoreDataContext) {
-        super.init(usingContext: context)
-    }
-}
-
-class PlaylistDAO: CoreDataDAO<Playlist> {
-    override init(usingContext context: CoreDataContext) {
-        super.init(usingContext: context)
-    }
-}
-
 class BaseTestCase: XCTestCase {
     
-    var audioDAO: AudioDAO!
-    var playlistDAO: PlaylistDAO!
+    var audioDAO: CoreDataDAO<Audio>!
+    var playlistDAO: CoreDataDAO<Playlist>!
     var coreDataManager: CoreDataManager!
     var coreDataContext: CoreDataContext!
     
@@ -57,12 +45,12 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         do {
-            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", sqlFileName: nil, inBundle:NSBundle(forClass: BaseTestCase.self),  securityApplicationGroup: nil, enableCloud: false)
+            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", inBundle:NSBundle(forClass: BaseTestCase.self))
             try self.coreDataManager.setupCoreDataStack()
-            self.coreDataContext = CoreDataContext(usingPersistentStoreCoordinator: self.coreDataManager.persistentStoreCoordinator!, concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
+            self.coreDataContext = self.coreDataManager.makeContext(associateWithMainQueue: true)
             
-            self.audioDAO = AudioDAO(usingContext: self.coreDataContext)
-            self.playlistDAO = PlaylistDAO(usingContext: self.coreDataContext)
+            self.audioDAO = CoreDataDAO<Audio>(usingContext: self.coreDataContext)
+            self.playlistDAO = CoreDataDAO<Playlist>(usingContext: self.coreDataContext)
             
             try self.playlistDAO.truncate("Playlist")
             try self.audioDAO.truncate("Audio")

@@ -43,8 +43,10 @@ public protocol CoreDataManagerDelegate: class {
 
 public class CoreDataManager: NSObject {
 
-    public var persistentStoreCoordinator : NSPersistentStoreCoordinator?
+    private var persistentStoreCoordinator : NSPersistentStoreCoordinator?
+    
     public weak var delegate : CoreDataManagerDelegate?
+    
     let modelName : String
     let icloud : Bool
     let appGroup: String?
@@ -85,6 +87,14 @@ public class CoreDataManager: NSObject {
         NSNotificationCenter.defaultCenter().removeObserver(self, name: NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: self.persistentStoreCoordinator)
         if let store = self.persistentStoreCoordinator?.persistentStores.first {
             try self.persistentStoreCoordinator?.removePersistentStore(store)
+        }
+    }
+    
+    public func makeContext(associateWithMainQueue associateWithMainQueue: Bool) -> CoreDataContext {
+        if associateWithMainQueue {
+            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .MainQueueConcurrencyType)
+        } else {
+            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .PrivateQueueConcurrencyType)
         }
     }
     
