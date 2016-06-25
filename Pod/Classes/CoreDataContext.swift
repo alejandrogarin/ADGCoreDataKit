@@ -30,8 +30,8 @@ import Foundation
 import CoreData
 
 public protocol CoreDataContextDelegate: class {
-    func coreDataContextObjectsDidChangeNotification(notification: NSNotification)
-    func coreDataContextObjectContextDidSaveNotification(notification: NSNotification)
+    func coreDataContextObjectsDidChangeNotification(_ notification: Notification)
+    func coreDataContextObjectContextDidSaveNotification(_ notification: Notification)
 }
 
 public class CoreDataContext: NSObject {
@@ -52,45 +52,40 @@ public class CoreDataContext: NSObject {
         objectContext.persistentStoreCoordinator = storeCoordinator
         super.init()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(objectsDidChangeNotification), name: NSManagedObjectContextObjectsDidChangeNotification, object: objectContext)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(objectContextDidSaveNotification), name: NSManagedObjectContextDidSaveNotification, object: nil)
+        NotificationCenter.default().addObserver(self, selector: #selector(objectsDidChangeNotification), name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
+        NotificationCenter.default().addObserver(self, selector: #selector(objectContextDidSaveNotification), name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
     }
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: objectContext)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextDidSaveNotification, object: nil)
+        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
+        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
     }
     
-    public func objectContextDidSaveNotification(notification: NSNotification) {
+    public func objectContextDidSaveNotification(_ notification: Notification) {
         self.delegate?.coreDataContextObjectsDidChangeNotification(notification)
     }
     
-    public func objectsDidChangeNotification(notification: NSNotification) {
+    public func objectsDidChangeNotification(_ notification: Notification) {
         self.delegate?.coreDataContextObjectsDidChangeNotification(notification)
     }
     
     public func fetch(byManagedObjectId objectId: NSManagedObjectID) throws -> NSManagedObject {
-        return try objectContext.existingObjectWithID(objectId)
+        return try objectContext.existingObject(with: objectId)
     }
     
-    public func find(entityName entityName : String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [AnyObject] {
+    public func find(entityName: String, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [AnyObject] {
         let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
-        return try objectContext.executeFetchRequest(request)
+        return try objectContext.fetch(request)
     }
         
-    public func count(rowsForEntityName entityName: String, predicate: NSPredicate?) throws -> Int {
+    public func count(rowsForEntityName entityName: String, predicate: Predicate?) throws -> Int {
         let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate)
         var error: NSError?
-        let count = objectContext.countForFetchRequest(request, error: &error)
-        //TODO: change this error throwing in the next swift update. The countForFetchRequest API should throws
-        if let error = error {
-            throw error
-        }
-        return count
+        return try objectContext.count(for: request)
     }
         
-    public func insert(withEntityName entityName : String) -> NSManagedObject {
-        return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
+    public func insert(withEntityName entityName: String) -> NSManagedObject {
+        return NSEntityDescription.insertNewObject(forEntityName: entityName, into: self.objectContext)
     }
     
     public func delete(byId objectId: String) throws {
@@ -98,8 +93,8 @@ public class CoreDataContext: NSObject {
         try self.delete(managedObject: self.fetch(byManagedObjectId: managedObjectId))
     }
     
-    public func delete(managedObject managedObject: NSManagedObject) -> Void {
-        objectContext.deleteObject(managedObject)
+    public func delete(managedObject: NSManagedObject) -> Void {
+        objectContext.delete(managedObject)
     }
     
     public func save() throws {
@@ -114,22 +109,22 @@ public class CoreDataContext: NSObject {
         objectContext.reset()
     }
     
-    public func performBlock(block: () -> Void) {
-        objectContext.performBlock(block)
+    public func performBlock(_ block: () -> Void) {
+        objectContext.perform(block)
     }
     
-    public func managedObjectIdFromStringObjectId(objectId: String) throws -> NSManagedObjectID {
-        guard let url = NSURL(string: objectId), managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectIDForURIRepresentation(url) else {
-            throw CoreDataKitError.ManagedObjectIdNotFound
+    public func managedObjectIdFromStringObjectId(_ objectId: String) throws -> NSManagedObjectID {
+        guard let url = URL(string: objectId), managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectID(forURIRepresentation: url) else {
+            throw CoreDataKitError.managedObjectIdNotFound
         }
         return managedObjectId;
     }
     
-    private func createFetchRequest(forEntityName entityName : String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) -> NSFetchRequest {
-        let request = NSFetchRequest()
+    private func createFetchRequest(forEntityName entityName : String, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) -> NSFetchRequest<NSManagedObject> {
+        let request = NSFetchRequest<NSManagedObject>()
         request.sortDescriptors = sortDescriptors
         request.predicate = predicate
-        request.entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: self.objectContext)
+        request.entity = NSEntityDescription.entity(forEntityName: entityName, in: self.objectContext)
         if let page = page, pageSize = pageSize {
             request.fetchLimit = pageSize;
             request.fetchOffset = page * pageSize

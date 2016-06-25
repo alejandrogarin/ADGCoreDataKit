@@ -18,7 +18,7 @@ class ViewController: UITableViewController {
         self.dao = CoreDataGenericDAO<TableA>(usingContext: context, forEntityName: "TableA")
         
         for i in 0..<10 {
-            try! self.dao.insert(withMap: ["ta_field1":"value \(i)", "ta_field2":i])
+            let _ =  try! self.dao.insert(withMap: ["ta_field1":"value \(i)", "ta_field2":i])
         }
 
         self.datasource = try! self.dao.find()
@@ -26,34 +26,34 @@ class ViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.datasource.count
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == UITableViewCellEditingStyle.Delete {
-            try! self.delete(self.datasource[indexPath.row])
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCellEditingStyle.delete {
+            try! self.delete(self.datasource[(indexPath as NSIndexPath).row])
 
             self.tableView.beginUpdates()
-            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-            self.datasource.removeAtIndex(indexPath.row)
+            self.tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.fade)
+            self.datasource.remove(at: (indexPath as NSIndexPath).row)
             self.tableView.endUpdates()
         }
     }
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func delete(table: TableA) throws {
+    func delete(_ table: TableA) throws {
         try self.dao.delete(managedObject: table)
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("aCell", forIndexPath: indexPath) as UITableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "aCell", for: indexPath) as UITableViewCell
         
-        let aTable = self.datasource[indexPath.row]
+        let aTable = self.datasource[(indexPath as NSIndexPath).row]
         cell.textLabel?.text = (aTable.ta_field1)
         
         return cell;

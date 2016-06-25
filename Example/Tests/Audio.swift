@@ -31,7 +31,7 @@ import CoreData
 
 class Audio: NSManagedObject {
 
-    @NSManaged var creationdate: NSDate?
+    @NSManaged var creationdate: Date?
     @NSManaged var path: String?
     @NSManaged var title: String?
     @NSManaged var playlist: Playlist?

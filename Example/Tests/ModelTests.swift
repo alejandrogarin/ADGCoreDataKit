@@ -88,7 +88,7 @@ class ModelTests: BaseTestCase {
         tryTest {
             let playlist = try self.insertPlaylist("play1")
             let objectId = self.stringObjectId(fromMO: playlist)
-            try self.playlistDAO.update(byId: objectId, map: ["name": "updated"])
+            let _ = try self.playlistDAO.update(byId: objectId, map: ["name": "updated"])
             let array: [Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(array.count, 1)
             let updatedPlaylist:Playlist! = array.first
@@ -148,7 +148,7 @@ class ModelTests: BaseTestCase {
     func testFind() {
         tryTest {
             for i in 0..<100 {
-                try self.insertPlaylist("play \(i)")
+                let _ = try self.insertPlaylist("play \(i)")
             }
             let result:[Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(result.count, 100)
@@ -158,7 +158,7 @@ class ModelTests: BaseTestCase {
     func testCount() {
         tryTest {
             for i in 0..<100 {
-                try self.insertPlaylist("play \(i)")
+                let _ = try self.insertPlaylist("play \(i)")
             }
             XCTAssertEqual(try self.playlistDAO.count(), 100)
         }
@@ -167,9 +167,9 @@ class ModelTests: BaseTestCase {
     func testCount_WithPredicate() {
         tryTest {
             for i in 0..<100 {
-                try self.insertPlaylist("play \(i)")
+                let _ = try self.insertPlaylist("play \(i)")
             }
-            let predicate = NSPredicate(format: "name == %@", "play 1")
+            let predicate = Predicate(format: "name == %@", "play 1")
             XCTAssertEqual(try self.playlistDAO.count(withPredicate: predicate), 1)
         }
     }
@@ -196,7 +196,7 @@ class ModelTests: BaseTestCase {
     func testOperationWithManualCommit() {
         tryTest { 
             self.playlistDAO.autocommit = false
-            try self.insertPlaylist("playlist")
+            let _ = try self.insertPlaylist("playlist")
             self.playlistDAO.rollback()
             XCTAssertEqual(try self.playlistDAO.count(), 0)
         }
@@ -209,8 +209,8 @@ class ModelTests: BaseTestCase {
                 var name: String
             }
             
-            try self.insertPlaylist("playlist1")
-            try self.insertPlaylist("playlist2")
+            let _ = try self.insertPlaylist("playlist1")
+            let _ = try self.insertPlaylist("playlist2")
             let result = try self.playlistDAO.findTransformed(transformationHandler: { (entity: Playlist) -> PlaylistDAO in
                 return PlaylistDAO(name: entity.name!)
             })

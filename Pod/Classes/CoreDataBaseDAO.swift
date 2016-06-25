@@ -46,7 +46,7 @@ public class CoreDataBaseDAO: NSObject {
         self.entityName = entityName
     }
     
-    public func count(withPredicate predicate: NSPredicate? = nil) throws -> Int {
+    public func count(withPredicate predicate: Predicate? = nil) throws -> Int {
         return try self.coreDataContext.count(rowsForEntityName: entityName, predicate: predicate)
     }
     
@@ -59,7 +59,7 @@ public class CoreDataBaseDAO: NSObject {
         try self.saveIfAutocommit()
     }
     
-    public func delete(managedObject managedObject: NSManagedObject) throws {
+    public func delete(managedObject: NSManagedObject) throws {
         self.coreDataContext.delete(managedObject: managedObject)
         try self.saveIfAutocommit()
     }
@@ -73,7 +73,7 @@ public class CoreDataBaseDAO: NSObject {
         return try self.coreDataContext.fetch(byManagedObjectId: moId)
     }
     
-    public func performBlock(block: () -> Void) {
+    public func performBlock(_ block: () -> Void) {
         coreDataContext.performBlock(block)
     }
     

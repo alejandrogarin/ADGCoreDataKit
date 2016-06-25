@@ -40,7 +40,7 @@ class RawTests: BaseTestCase {
         self.dao = CoreDataGenericDAO<NSManagedObject>(usingContext: coreDataContext, forEntityName: "Playlist")
     }
     
-    private func insertPlaylistManagedObject(name: String, order: Int?) throws -> NSManagedObject {
+    private func insertPlaylistManagedObject(_ name: String, order: Int?) throws -> NSManagedObject {
         var map: [String: AnyObject] = ["name": name]
         if let order = order {
             map["order"] = order
@@ -53,7 +53,7 @@ class RawTests: BaseTestCase {
     func testInsertPlaylistUsingDAO() {
         tryTest {
             let map: [String: AnyObject] = ["name": "the name"]
-            try self.dao.insert(withMap: map)
+            let _ =  try self.dao.insert(withMap: map)
             let count = try self.dao.find().count
             XCTAssertEqual(1, count)
         }
@@ -62,7 +62,7 @@ class RawTests: BaseTestCase {
     func testInsertWithNullValues() {
         tryTest {
             let object = try self.dao.insert(withMap: ["name":nil, "order": 1])
-            XCTAssertTrue(object.valueForKey("name") == nil)
+            XCTAssertTrue(object.value(forKey: "name") == nil)
         }
     }
     
@@ -101,8 +101,8 @@ class RawTests: BaseTestCase {
         do {
             let playlist = try self.insertPlaylistManagedObject("play1", order: 0);
             try self.dao.update(managedObject: playlist, map: ["order": 1])
-            try self.dao.fetch(byId: "The invalid object id 123455")
-        } catch CoreDataKitError.ManagedObjectIdNotFound {
+            let _ = try self.dao.fetch(byId: "The invalid object id 123455")
+        } catch CoreDataKitError.managedObjectIdNotFound {
             XCTAssertTrue(true)
         } catch {
             XCTFail()
@@ -111,7 +111,7 @@ class RawTests: BaseTestCase {
     
     func testCreateAndFindPlaylist() {
         tryTest {
-            try self.insertPlaylistManagedObject("play1", order: 0);
+            let _ = try self.insertPlaylistManagedObject("play1", order: 0);
             let list = try self.dao.find()
             XCTAssertEqual(1, list.count)
             let object: NSManagedObject? = list.first
@@ -126,7 +126,7 @@ class RawTests: BaseTestCase {
     func testFindAllPlaylists() {
        tryTest {
             for i in 0 ..< 100 {
-                try self.insertPlaylist("play \(i)", order: i)
+                let _ = try self.insertPlaylist("play \(i)", order: i)
             }
             let array: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist")
             XCTAssertEqual(array.count, 100)
@@ -136,9 +136,9 @@ class RawTests: BaseTestCase {
     func testFindPlaylistWithPredicate() {
         tryTest {
             for i in 0 ..< 100 {
-                try self.insertPlaylist("play \(i)", order: i)
+                let _ = try self.insertPlaylist("play \(i)", order: i)
             }
-            let predicate = NSPredicate(format: "name CONTAINS %@", "play 2")
+            let predicate = Predicate(format: "name CONTAINS %@", "play 2")
             let array: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: predicate)
             XCTAssertEqual(array.count, 11)
         }
@@ -147,10 +147,10 @@ class RawTests: BaseTestCase {
     func testFindPlaylistWithPaggingAndOrder() {
         tryTest {
             for i in 0 ..< 100 {
-                try self.insertPlaylist("play \(i)", order: i)
+                let _ = try self.insertPlaylist("play \(i)", order: i)
             }
             
-            let descriptor = [NSSortDescriptor(key: "order", ascending: true)]
+            let descriptor = [SortDescriptor(key: "order", ascending: true)]
             
             let arrayPage0: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 0, pageSize: 10)
             let arrayPage1: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 1, pageSize: 10)
@@ -162,16 +162,16 @@ class RawTests: BaseTestCase {
             XCTAssertEqual(arrayPage10.count, 0)
             var object1: NSManagedObject = arrayPage0.first! as! NSManagedObject
             var object10: NSManagedObject = arrayPage0.last! as! NSManagedObject
-            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 0")
-            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 9")
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 0")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 9")
             object1 = arrayPage1.first! as! NSManagedObject
             object10 = arrayPage1.last! as! NSManagedObject
-            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 10")
-            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 19")
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 10")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 19")
             object1 = arrayPage9.first! as! NSManagedObject
             object10 = arrayPage9.last! as! NSManagedObject
-            XCTAssertEqual((object1.valueForKey("name") as? String)!, "play 90")
-            XCTAssertEqual((object10.valueForKey("name") as? String)!, "play 99")
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 90")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 99")
         }
     }
 }

@@ -28,16 +28,16 @@
 
 import CoreData
 
-public enum CoreDataKitError: ErrorType {
-    case CannotFindObjectModel(name: String, bundle: NSBundle)
-    case CannotCreateManagedModelObject(path: String)
-    case ManagedObjectIdNotFound
+public enum CoreDataKitError: ErrorProtocol {
+    case cannotFindObjectModel(name: String, bundle: Bundle)
+    case cannotCreateManagedModelObject(path: String)
+    case managedObjectIdNotFound
 }
 
 public protocol CoreDataManagerDelegate: class {
-    func coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification: NSNotification)
-    func coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(transition: NSPersistentStoreUbiquitousTransitionType)
-    func coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(transition: NSPersistentStoreUbiquitousTransitionType)
+    func coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(_ notification: Notification)
+    func coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(_ transition: NSPersistentStoreUbiquitousTransitionType)
+    func coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(_ transition: NSPersistentStoreUbiquitousTransitionType)
 }
 
 public class CoreDataManager: NSObject {
@@ -49,12 +49,12 @@ public class CoreDataManager: NSObject {
     let modelName : String
     let icloud : Bool
     let appGroup: String?
-    let bundle: NSBundle
+    let bundle: Bundle
     let sqlFileName: String?
     let useInMemoryStore: Bool
     var objectModel : NSManagedObjectModel?
     
-    public init(usingModelName modelName: String, sqlFileName: String? = nil, inBundle bundle: NSBundle? = nil, securityApplicationGroup appGroup: String? = nil, enableCloud: Bool = false, useInMemoryStore: Bool = false) {
+    public init(usingModelName modelName: String, sqlFileName: String? = nil, inBundle bundle: Bundle? = nil, securityApplicationGroup appGroup: String? = nil, enableCloud: Bool = false, useInMemoryStore: Bool = false) {
         self.modelName = modelName
         self.appGroup = appGroup
         self.icloud = enableCloud
@@ -63,7 +63,7 @@ public class CoreDataManager: NSObject {
         if let bundle = bundle {
             self.bundle = bundle
         } else {
-            self.bundle = NSBundle.mainBundle()
+            self.bundle = Bundle.main()
         }
         super.init()
     }
@@ -74,65 +74,65 @@ public class CoreDataManager: NSObject {
         } else {
             self.persistentStoreCoordinator = try self.createPersistentStoreCoordinator()
         }
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSPersistentStoreCoordinatorStoresDidChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:
-            #selector(persistentStoreCoordinatorStoresWillChangeNotification), name: NSPersistentStoreCoordinatorStoresWillChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().addObserver(self, selector:
+            #selector(persistentStoreCoordinatorStoresWillChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
     }
     
     public func shutdownCoreDataStack() throws {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSPersistentStoreCoordinatorStoresDidChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSPersistentStoreCoordinatorStoresWillChangeNotification, object: self.persistentStoreCoordinator)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
         if let store = self.persistentStoreCoordinator?.persistentStores.first {
-            try self.persistentStoreCoordinator?.removePersistentStore(store)
+            try self.persistentStoreCoordinator?.remove(store)
         }
     }
     
-    public func makeContext(associateWithMainQueue associateWithMainQueue: Bool) -> CoreDataContext {
+    public func makeContext(associateWithMainQueue: Bool) -> CoreDataContext {
         if associateWithMainQueue {
-            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .MainQueueConcurrencyType)
+            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .mainQueueConcurrencyType)
         } else {
-            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .PrivateQueueConcurrencyType)
+            return CoreDataContext(usingPersistentStoreCoordinator: self.persistentStoreCoordinator!, concurrencyType: .privateQueueConcurrencyType)
         }
     }
     
-    func persistentStoreCoordinatorStoresDidChangeNotification(notification: NSNotification) {
-        if let userInfo = notification.userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
+    func persistentStoreCoordinatorStoresDidChangeNotification(_ notification: Notification) {
+        if let userInfo = (notification as NSNotification).userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
             self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(enumType)
         }
     }
     
-    func persistentStoreCoordinatorStoresWillChangeNotification(notification: NSNotification) {
-        if let userInfo = notification.userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
+    func persistentStoreCoordinatorStoresWillChangeNotification(_ notification: Notification) {
+        if let userInfo = (notification as NSNotification).userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
             self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(enumType)
         }
     }
     
-    func persistentStoreDidImportUbiquitousContentChangesNotification(notification: NSNotification) {
+    func persistentStoreDidImportUbiquitousContentChangesNotification(_ notification: Notification) {
         self.delegate?.coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification)
     }
     
-    private func convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type: UInt) -> NSPersistentStoreUbiquitousTransitionType? {
-        if type == NSPersistentStoreUbiquitousTransitionType.AccountAdded.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.AccountAdded
-        } else if type == NSPersistentStoreUbiquitousTransitionType.AccountRemoved.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.AccountRemoved
-        } else if type == NSPersistentStoreUbiquitousTransitionType.ContentRemoved.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.ContentRemoved
-        } else if type == NSPersistentStoreUbiquitousTransitionType.InitialImportCompleted.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.InitialImportCompleted
+    private func convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(_ type: UInt) -> NSPersistentStoreUbiquitousTransitionType? {
+        if type == NSPersistentStoreUbiquitousTransitionType.accountAdded.rawValue {
+            return NSPersistentStoreUbiquitousTransitionType.accountAdded
+        } else if type == NSPersistentStoreUbiquitousTransitionType.accountRemoved.rawValue {
+            return NSPersistentStoreUbiquitousTransitionType.accountRemoved
+        } else if type == NSPersistentStoreUbiquitousTransitionType.contentRemoved.rawValue {
+            return NSPersistentStoreUbiquitousTransitionType.contentRemoved
+        } else if type == NSPersistentStoreUbiquitousTransitionType.initialImportCompleted.rawValue {
+            return NSPersistentStoreUbiquitousTransitionType.initialImportCompleted
         } else {
             return nil
         }
     }
     
-    private func applicationDocumentDirectory() -> NSURL? {
-        let fileManager = NSFileManager.defaultManager()
+    private func applicationDocumentDirectory() -> URL? {
+        let fileManager = FileManager.default()
         if let actualAppGroup = self.appGroup {
             return fileManager.containerURLForSecurityApplicationGroupIdentifier(actualAppGroup)
         }
-        let urlsForDir = fileManager.URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask)
+        let urlsForDir = fileManager.urlsForDirectory(FileManager.SearchPathDirectory.documentDirectory, inDomains: FileManager.SearchPathDomainMask.userDomainMask)
         return urlsForDir.first
     }
     
@@ -141,12 +141,12 @@ public class CoreDataManager: NSObject {
             return self.objectModel!
         }
         
-        guard let modelURL = self.bundle.URLForResource(self.modelName, withExtension: "momd") else {
-            throw CoreDataKitError.CannotFindObjectModel(name: self.modelName, bundle: self.bundle)
+        guard let modelURL = self.bundle.urlForResource(self.modelName, withExtension: "momd") else {
+            throw CoreDataKitError.cannotFindObjectModel(name: self.modelName, bundle: self.bundle)
         }
 
-        guard let managedObjectModel = NSManagedObjectModel(contentsOfURL: modelURL) else {
-            throw CoreDataKitError.CannotCreateManagedModelObject(path: modelURL.absoluteString)
+        guard let managedObjectModel = NSManagedObjectModel(contentsOf: modelURL) else {
+            throw CoreDataKitError.cannotCreateManagedModelObject(path: modelURL.absoluteString!)
         }
         
         return managedObjectModel
@@ -155,7 +155,7 @@ public class CoreDataManager: NSObject {
     private func createInMemoryPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
         self.objectModel = try createManagedObjectModel()
         let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!)
-        try storeCoordinator.addPersistentStoreWithType(NSInMemoryStoreType, configuration: nil, URL: nil, options: nil)
+        try storeCoordinator.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
         return storeCoordinator
     }
     
@@ -172,13 +172,13 @@ public class CoreDataManager: NSObject {
         if let sqlFileName = self.sqlFileName {
             storeFile = sqlFileName + ".sqlite"
         }
-        let documentDirectory: NSURL? = applicationDocumentDirectory()
-        let storeURL: NSURL? = documentDirectory?.URLByAppendingPathComponent(storeFile)
+        let documentDirectory: URL? = applicationDocumentDirectory()
+        let storeURL: URL? = try! documentDirectory?.appendingPathComponent(storeFile)
 
         self.objectModel = try createManagedObjectModel()
         
         let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel!)
-        try storeCoordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: storeOptions)
+        try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeURL, options: storeOptions)
         return storeCoordinator
     }
 }

@@ -57,7 +57,7 @@ public class CoreDataManagedObjectDAO: CoreDataBaseDAO {
         return self.managedObjectArray(fromGenericArray: list)
     }
     
-    public func find(withPredicate predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?) throws -> [NSManagedObject] {
+    public func find(withPredicate predicate: Predicate?, sortDescriptors: [SortDescriptor]?) throws -> [NSManagedObject] {
         let list: [AnyObject] = try self.coreDataContext.find(entityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: nil, pageSize: nil)
         return self.managedObjectArray(fromGenericArray: list)
     }

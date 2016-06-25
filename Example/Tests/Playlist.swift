@@ -31,7 +31,7 @@ import CoreData
 
 class Playlist: NSManagedObject {
 
-    @NSManaged var lastplayed: NSDate?
+    @NSManaged var lastplayed: Date?
     @NSManaged var name: String?
     @NSManaged var order: NSNumber?
     @NSManaged var audios: NSSet?

@@ -45,7 +45,7 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         do {
-            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", inBundle:NSBundle(forClass: BaseTestCase.self), useInMemoryStore: true)
+            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", inBundle:Bundle(for: BaseTestCase.self), useInMemoryStore: true)
             try self.coreDataManager.setupCoreDataStack()
             self.coreDataContext = self.coreDataManager.makeContext(associateWithMainQueue: true)
             
@@ -65,7 +65,7 @@ class BaseTestCase: XCTestCase {
         }
     }
     
-    func tryTest(@noescape f: () throws -> Void) {
+    func tryTest(_ f: @noescape() throws -> Void) {
         do {
             try f()
         } catch let error as NSError {
@@ -75,7 +75,7 @@ class BaseTestCase: XCTestCase {
     
     func testTruncate() {
         tryTest {
-            try self.insertPlaylist("test");
+            let _ = try self.insertPlaylist("test");
             let count: Int = (try self.playlistDAO.find()).count;
             XCTAssertEqual(count, 1);
             try self.playlistDAO.truncate()
@@ -84,11 +84,11 @@ class BaseTestCase: XCTestCase {
         }
     }
     
-    func insertPlaylist(name: String?) throws -> Playlist {
+    func insertPlaylist(_ name: String?) throws -> Playlist {
         return try self.insertPlaylist(name, order: nil)
     }
     
-    func insertPlaylist(name: String?, order: Int?) throws -> Playlist {
+    func insertPlaylist(_ name: String?, order: Int?) throws -> Playlist {
         var map: [String: AnyObject?] = ["name": name]
         map["order"] = order
         map["lastplayed"] = nil
@@ -97,7 +97,7 @@ class BaseTestCase: XCTestCase {
         return playlist;
     }
     
-    func insertAudio(title: String, playlist: Playlist?) throws -> Audio {
+    func insertAudio(_ title: String, playlist: Playlist?) throws -> Audio {
         var map: [String: AnyObject] = ["title": title]
         if let playlist = playlist {
             map["playlist"] = playlist
@@ -109,17 +109,17 @@ class BaseTestCase: XCTestCase {
     
     func stringObjectId(fromMO mo: NSManagedObject) -> String {
         let objectId : NSManagedObjectID = mo.objectID
-        let url = objectId.URIRepresentation()
+        let url = objectId.uriRepresentation()
         let absURL = url.absoluteString
-        return absURL;
+        return absURL!;
     }
     
-    func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
+    func managedObjectsToDictionary(_ managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
         var result:[[String:Any]] = []
         for object in managedObjects {
             var dtoMap: [String: Any] = [:]
             for key in keys {
-                if let value:AnyObject = object.valueForKey(key) {
+                if let value:AnyObject = object.value(forKey: key) {
                     dtoMap[key] = value
                 }
             }
@@ -129,7 +129,7 @@ class BaseTestCase: XCTestCase {
         return result
     }
     
-    func managedObjectToDictionary(managedObject: NSManagedObject, keys:[String]) -> [String:Any] {
+    func managedObjectToDictionary(_ managedObject: NSManagedObject, keys:[String]) -> [String:Any] {
         if let result = self.managedObjectsToDictionary([managedObject], keys: keys).first {
             return result
         } else {
@@ -137,13 +137,13 @@ class BaseTestCase: XCTestCase {
         }
     }
     
-    func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
+    func managedObjectsToDictionary(_ managedObjects: [NSManagedObject]) -> [[String:Any]] {
         var result:[[String:Any]] = []
         for object in managedObjects {
             var dtoMap: [String: Any] = [:]
-            let valuesForKey = object.committedValuesForKeys(nil)
+            let valuesForKey = object.committedValues(forKeys: nil)
             for key in valuesForKey.keys {
-                if let value:AnyObject = object.valueForKey(key) {
+                if let value:AnyObject = object.value(forKey: key) {
                     dtoMap[key] = value
                 }
             }
@@ -153,7 +153,7 @@ class BaseTestCase: XCTestCase {
         return result
     }
     
-    func managedObjectToDictionary(managedObject: NSManagedObject) -> [String:Any] {
+    func managedObjectToDictionary(_ managedObject: NSManagedObject) -> [String:Any] {
         if let result = self.managedObjectsToDictionary([managedObject]).first {
             return result
         } else {
