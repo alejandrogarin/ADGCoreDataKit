@@ -36,8 +36,8 @@ enum CoreDataKitKeys: String {
 
 class BaseTestCase: XCTestCase {
     
-    var audioDAO: CoreDataDAO<Audio>!
-    var playlistDAO: CoreDataDAO<Playlist>!
+    var audioDAO: CoreDataGenericDAO<Audio>!
+    var playlistDAO: CoreDataGenericDAO<Playlist>!
     var coreDataManager: CoreDataManager!
     var coreDataContext: CoreDataContext!
     
@@ -45,15 +45,12 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         do {
-            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", inBundle:NSBundle(forClass: BaseTestCase.self))
+            self.coreDataManager = CoreDataManager(usingModelName: "TestModel", inBundle:NSBundle(forClass: BaseTestCase.self), useInMemoryStore: true)
             try self.coreDataManager.setupCoreDataStack()
             self.coreDataContext = self.coreDataManager.makeContext(associateWithMainQueue: true)
             
-            self.audioDAO = CoreDataDAO<Audio>(usingContext: self.coreDataContext)
-            self.playlistDAO = CoreDataDAO<Playlist>(usingContext: self.coreDataContext)
-            
-            try self.playlistDAO.truncate("Playlist")
-            try self.audioDAO.truncate("Audio")
+            self.audioDAO = CoreDataGenericDAO<Audio>(usingContext: self.coreDataContext, forEntityName: "Audio")
+            self.playlistDAO = CoreDataGenericDAO<Playlist>(usingContext: self.coreDataContext, forEntityName: "Playlist")
         } catch let error as NSError {
             XCTFail("\(error)")
         }
@@ -68,27 +65,34 @@ class BaseTestCase: XCTestCase {
         }
     }
     
-    func testTruncate() {
+    func tryTest(@noescape f: () throws -> Void) {
         do {
-            try self.insertPlaylist("test");
-            let count: Int = (try self.playlistDAO.findObjectsByEntity("Playlist") as [NSManagedObject]).count;
-            XCTAssertEqual(count, 1);
-            try self.playlistDAO.truncate("Playlist");
-            let countAfterTruncate: Int = (try self.playlistDAO.findObjectsByEntity("Playlist") as [NSManagedObject]).count;
-            XCTAssertEqual(countAfterTruncate, 0);
-        } catch {
-            XCTFail()
+            try f()
+        } catch let error as NSError {
+            XCTFail("\(error)")            
         }
     }
     
-    func insertPlaylist(name: String) throws -> Playlist {
+    func testTruncate() {
+        tryTest {
+            try self.insertPlaylist("test");
+            let count: Int = (try self.playlistDAO.find()).count;
+            XCTAssertEqual(count, 1);
+            try self.playlistDAO.truncate()
+            let countAfterTruncate: Int = (try self.playlistDAO.find()).count;
+            XCTAssertEqual(countAfterTruncate, 0);
+        }
+    }
+    
+    func insertPlaylist(name: String?) throws -> Playlist {
         return try self.insertPlaylist(name, order: nil)
     }
     
-    func insertPlaylist(name: String, order: Int?) throws -> Playlist {
-        var map: [String: AnyObject] = ["name": name]
+    func insertPlaylist(name: String?, order: Int?) throws -> Playlist {
+        var map: [String: AnyObject?] = ["name": name]
         map["order"] = order
-        let playlist: Playlist = try self.playlistDAO.insert(map: map)
+        map["lastplayed"] = nil
+        let playlist: Playlist = try self.playlistDAO.insert(withMap: map)
         XCTAssertNotNil(playlist)
         return playlist;
     }
@@ -98,9 +102,16 @@ class BaseTestCase: XCTestCase {
         if let playlist = playlist {
             map["playlist"] = playlist
         }
-        let audio: Audio = try self.audioDAO.insert(map: map)
+        let audio: Audio = try self.audioDAO.insert(withMap: map)
         XCTAssertNotNil(audio)
         return audio;
+    }
+    
+    func stringObjectId(fromMO mo: NSManagedObject) -> String {
+        let objectId : NSManagedObjectID = mo.objectID
+        let url = objectId.URIRepresentation()
+        let absURL = url.absoluteString
+        return absURL;
     }
     
     func managedObjectsToDictionary(managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
@@ -112,7 +123,7 @@ class BaseTestCase: XCTestCase {
                     dtoMap[key] = value
                 }
             }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = self.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result
@@ -136,7 +147,7 @@ class BaseTestCase: XCTestCase {
                     dtoMap[key] = value
                 }
             }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
+            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = self.stringObjectId(fromMO: object)
             result.append(dtoMap)
         }
         return result

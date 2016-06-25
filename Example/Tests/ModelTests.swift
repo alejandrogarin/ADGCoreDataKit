@@ -38,36 +38,66 @@ class ModelTests: BaseTestCase {
     }
     
     func testInsertPlaylist() {
-        do {
+        tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
             if let name = playlist.name, order = playlist.order {
                 XCTAssertEqual(name, "play1")
                 XCTAssertEqual(order, 0)
-                try self.playlistDAO.delete(object: playlist)
+                try self.playlistDAO.delete(managedObject: playlist)
                 XCTAssert(true)
             } else {
                 XCTFail("Couldn't insert playlist correctly");
             }
-        } catch  {
-            XCTFail()
+        }
+    }
+    
+    func testInsert_WithNull() {
+        tryTest {
+            let playlist: Playlist = try self.insertPlaylist(nil)
+            let name = playlist.name, order = playlist.order
+            XCTAssertNil(name)
+            XCTAssertEqual(order, 0)
+            try self.playlistDAO.delete(managedObject: playlist)
+            XCTAssert(true)
         }
     }
     
     func testUpdatePlaylist() {
-        do {
+        tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
             try self.playlistDAO.update(managedObject: playlist, map: ["name": "updated"])
-            let array: [Playlist] = try self.playlistDAO.findObjectsByEntity()
+            let array: [Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(array.count, 1)
             let updatedPlaylist:Playlist! = array.first
             XCTAssertEqual(updatedPlaylist.name!, "updated")
-        } catch  {
-            XCTFail()
+        }
+    }
+    
+    func testUpdatePlaylist_WithNullInProperty() {
+        tryTest {
+            let playlist: Playlist = try self.insertPlaylist("play1")
+            try self.playlistDAO.update(managedObject: playlist, map: ["name": nil])
+            let array: [Playlist] = try self.playlistDAO.find()
+            XCTAssertEqual(array.count, 1)
+            let updatedPlaylist:Playlist! = array.first
+            XCTAssertNil(updatedPlaylist.name)
+        }
+    }
+    
+    func testUpdatePlaylist_UsingObjectId() {
+        tryTest {
+            let playlist = try self.insertPlaylist("play1")
+            let objectId = self.stringObjectId(fromMO: playlist)
+            try self.playlistDAO.update(byId: objectId, map: ["name": "updated"])
+            let array: [Playlist] = try self.playlistDAO.find()
+            XCTAssertEqual(array.count, 1)
+            let updatedPlaylist:Playlist! = array.first
+            XCTAssertEqual(updatedPlaylist.name!, "updated")
         }
     }
     
     func testInsertAudio() {
-        do {
+        tryTest {
             let audio: Audio = try self.insertAudio("audio1", playlist: self.insertPlaylist("p1"))
             if let title = audio.title, audioPlaylist = audio.playlist {
                 XCTAssertEqual(title, "audio1")
@@ -75,13 +105,11 @@ class ModelTests: BaseTestCase {
             } else {
                 XCTFail("Couldn't insert audio correctly");
             }
-        } catch {
-            XCTFail()
         }
     }
     
     func testInsertAudioWithoutPlaylist() {
-        do {
+        tryTest {
             let audio: Audio = try self.insertAudio("audio1", playlist: nil)
             if let title = audio.title {
                 XCTAssertEqual(title, "audio1")
@@ -89,49 +117,107 @@ class ModelTests: BaseTestCase {
             } else {
                 XCTFail("Couldn't insert audio correctly");
             }
-        } catch {
-            XCTFail()
         }
     }
     
-    func testGetPlaylistUsingObjectIdString() {
-        do {
+    func testFetch_UsingStringObjectId() {
+        tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let objectId = CoreDataDAO.stringObjectId(fromMO: playlist)
-            let retrieved: Playlist = try self.playlistDAO.find(byId: objectId)
+            let objectId = self.stringObjectId(fromMO: playlist)
+            let retrieved: Playlist = try self.playlistDAO.fetch(byId: objectId)
             if let name = retrieved.name {
                 XCTAssertEqual(name, "play1")
             } else {
                 XCTFail("Playlist object is invalid");
             }
-        } catch {
-            XCTFail()
         }
     }
     
-    func testGetPlaylistUsingManagedObjectId() {
-        do {
+    func testFetch_UsingManagedObjectId() {
+        tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            let retrived: Playlist = try self.playlistDAO.findObjectByManagedObjectId(moId: playlist.objectID) as! Playlist
+            let retrived: Playlist = try self.playlistDAO.fetch(byManagedObjectId: playlist.objectID)
             if let name = retrived.name {
                 XCTAssertEqual(name, "play1")
             } else {
                 XCTFail("Playlist object is invalid");
             }
-        } catch {
-            XCTFail()
         }
     }
     
-    func testFindAllPlaylists() {
-        do {
+    func testFind() {
+        tryTest {
             for i in 0..<100 {
                 try self.insertPlaylist("play \(i)")
             }
-            let result:[Playlist] = try self.playlistDAO.findObjectsByEntity()
+            let result:[Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(result.count, 100)
-        } catch {
-            XCTFail()
         }
     }
+    
+    func testCount() {
+        tryTest {
+            for i in 0..<100 {
+                try self.insertPlaylist("play \(i)")
+            }
+            XCTAssertEqual(try self.playlistDAO.count(), 100)
+        }
+    }
+    
+    func testCount_WithPredicate() {
+        tryTest {
+            for i in 0..<100 {
+                try self.insertPlaylist("play \(i)")
+            }
+            let predicate = NSPredicate(format: "name == %@", "play 1")
+            XCTAssertEqual(try self.playlistDAO.count(withPredicate: predicate), 1)
+        }
+    }
+    
+    func testDelete_UsingManagedObject() {
+        tryTest { 
+            let playlist = try self.insertPlaylist("playlist")
+            XCTAssertEqual(try self.playlistDAO.find().count, 1)
+            try self.playlistDAO.delete(managedObject: playlist)
+            XCTAssertEqual(try self.playlistDAO.find().count, 0)
+        }
+    }
+    
+    func testDelete_UsingStringObjectId() {
+        tryTest {
+            let playlist = try self.insertPlaylist("playlist")
+            XCTAssertEqual(try self.playlistDAO.find().count, 1)
+            let objectId = self.stringObjectId(fromMO: playlist)
+            try self.playlistDAO.delete(byId: objectId)
+            XCTAssertEqual(try self.playlistDAO.find().count, 0)
+        }
+    }
+    
+    func testOperationWithManualCommit() {
+        tryTest { 
+            self.playlistDAO.autocommit = false
+            try self.insertPlaylist("playlist")
+            self.playlistDAO.rollback()
+            XCTAssertEqual(try self.playlistDAO.count(), 0)
+        }
+    }
+    
+    func testFind_Transformed() {
+        tryTest {
+            
+            struct PlaylistDAO {
+                var name: String
+            }
+            
+            try self.insertPlaylist("playlist1")
+            try self.insertPlaylist("playlist2")
+            let result = try self.playlistDAO.findTransformed(transformationHandler: { (entity: Playlist) -> PlaylistDAO in
+                return PlaylistDAO(name: entity.name!)
+            })
+            
+            XCTAssertEqual(result[0].name, "playlist1")
+            XCTAssertEqual(result[1].name, "playlist2")
+        }
+    }
+    
 }

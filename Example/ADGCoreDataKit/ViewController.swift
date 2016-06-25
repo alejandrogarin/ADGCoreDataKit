@@ -1,71 +1,28 @@
-//
-//  ViewController.swift
-//  CoreDataKitExample
-//
-//  Created by Alejandro Diego Garin on 5/20/15.
-//  Copyright (c) 2015 ADG. All rights reserved.
-//
-
 import UIKit
 import CoreData
 import ADGCoreDataKit
 
-enum CoreDataKitKeys: String {
-    case ObjectId = "_core_data_object_id"
-}
-
-class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
-    override init(usingContext context: CoreDataContext) {
-        super.init(usingContext: context)
-    }
-    
-    func managedObjectsToDictionary(managedObjects: [NSManagedObject]) -> [[String:Any]] {
-        var result:[[String:Any]] = []
-        for object in managedObjects {
-            var dtoMap: [String: Any] = [:]
-            let valuesForKey = object.committedValuesForKeys(nil)
-            for key in valuesForKey.keys {
-                if let value:AnyObject = object.valueForKey(key) {
-                    dtoMap[key] = value
-                }
-            }
-            dtoMap[CoreDataKitKeys.ObjectId.rawValue] = CoreDataDAO.stringObjectId(fromMO: object)
-            result.append(dtoMap)
-        }
-        return result
-    }
-}
-
 class ViewController: UITableViewController {
     
     var coreData:CoreDataManager!
-    var datasource: [[String:Any]] = []
-    var dao: ManagedObjectDAO!
+    var datasource: [TableA] = []
+    var dao: CoreDataGenericDAO<TableA>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.coreData = CoreDataManager(usingModelName: "Model")
+        self.coreData = CoreDataManager(usingModelName: "Model", useInMemoryStore: true)
         try! self.coreData.setupCoreDataStack()
         let context = self.coreData.makeContext(associateWithMainQueue: true)
         
-        self.dao = ManagedObjectDAO(usingContext: context)
+        self.dao = CoreDataGenericDAO<TableA>(usingContext: context, forEntityName: "TableA")
         
-        print("----- empty the table ----")
-        try! self.dao.truncate("TableA")
-        
-        print("----- insert some rows ----")
         for i in 0..<10 {
-            try! self.dao.insert(entityName:"TableA", map: ["ta_field1":"value \(i)", "ta_field2":i])
+            try! self.dao.insert(withMap: ["ta_field1":"value \(i)", "ta_field2":i])
         }
-        print("----- get the array of managed object ----")
-        let result = try! self.dao.findObjectsByEntity("TableA")
-        print(result)
+
+        self.datasource = try! self.dao.find()
         
-        print("----- create an array of dictionary elements representing the retrieved managed objects ----")
-        self.datasource = self.dao.managedObjectsToDictionary(result)
-        print(self.datasource)
-                
         self.tableView.reloadData()
     }
     
@@ -75,10 +32,8 @@ class ViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == UITableViewCellEditingStyle.Delete {
-            
-            print("----- delete the object from the store ----")
-            try! self.deleteObject(self.datasource[indexPath.row][CoreDataKitKeys.ObjectId.rawValue] as! String, atIndex: indexPath.row)
-            print("----- update both the local datasource and the tableview ----")
+            try! self.delete(self.datasource[indexPath.row])
+
             self.tableView.beginUpdates()
             self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
             self.datasource.removeAtIndex(indexPath.row)
@@ -90,16 +45,16 @@ class ViewController: UITableViewController {
         return true
     }
     
-    func deleteObject(let objectId: String, atIndex: Int) throws {
-        try self.dao.delete(objectId: objectId)
+    func delete(table: TableA) throws {
+        try self.dao.delete(managedObject: table)
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("aCell", forIndexPath: indexPath) as UITableViewCell
         
-        let dto: [String:Any] = self.datasource[indexPath.row]
-        cell.textLabel?.text = (dto["ta_field1"] as! String)
+        let aTable = self.datasource[indexPath.row]
+        cell.textLabel?.text = (aTable.ta_field1)
         
         return cell;
     }

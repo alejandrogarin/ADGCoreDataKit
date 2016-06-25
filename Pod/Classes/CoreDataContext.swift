@@ -42,6 +42,10 @@ public class CoreDataContext: NSObject {
     
     public weak var delegate : CoreDataContextDelegate?
     
+    public var hasChanges: Bool {
+        return self.objectContext.hasChanges
+    }
+    
     internal init(usingPersistentStoreCoordinator storeCoordinator : NSPersistentStoreCoordinator, concurrencyType type : NSManagedObjectContextConcurrencyType) {
         persistentCoordinator = storeCoordinator
         objectContext = NSManagedObjectContext(concurrencyType: type)
@@ -65,52 +69,49 @@ public class CoreDataContext: NSObject {
         self.delegate?.coreDataContextObjectsDidChangeNotification(notification)
     }
     
-    public func findObjectById(objectId: NSManagedObjectID) throws -> NSManagedObject {
+    public func fetch(byManagedObjectId objectId: NSManagedObjectID) throws -> NSManagedObject {
         return try objectContext.existingObjectWithID(objectId)
     }
     
-    public func findObjectsByEntity(entityName : String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, page: Int?, pageSize: Int?) throws -> [AnyObject] {
-        let request = self.createFetchRequestForEntity(entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
+    public func find(entityName entityName : String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [AnyObject] {
+        let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
         return try objectContext.executeFetchRequest(request)
     }
         
-    public func countObjectsByEntity(entityName : String, predicate: NSPredicate?) throws -> Int {
-        let request = self.createFetchRequestForEntity(entityName, predicate: predicate, sortDescriptors: nil, page: nil, pageSize: nil)
+    public func count(rowsForEntityName entityName: String, predicate: NSPredicate?) throws -> Int {
+        let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate)
         var error: NSError?
         let count = objectContext.countForFetchRequest(request, error: &error)
+        //TODO: change this error throwing in the next swift update. The countForFetchRequest API should throws
         if let error = error {
             throw error
         }
         return count
     }
         
-    public func insertObjectForEntity(entityName : String) -> NSManagedObject {
+    public func insert(withEntityName entityName : String) -> NSManagedObject {
         return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.objectContext)
     }
     
-    public func deleteObject(byObjectId objectId: String) throws {
+    public func delete(byId objectId: String) throws {
         let managedObjectId = try self.managedObjectIdFromStringObjectId(objectId)
-        try self.deleteObject(self.findObjectById(managedObjectId))
+        try self.delete(managedObject: self.fetch(byManagedObjectId: managedObjectId))
     }
     
-    public func deleteObject(managedObject : NSManagedObject) -> Void {
+    public func delete(managedObject managedObject: NSManagedObject) -> Void {
         objectContext.deleteObject(managedObject)
     }
     
-    public func saveContext() throws {
+    public func save() throws {
         try objectContext.save()
     }
     
-    public func rollbackContext() {
+    public func rollback() {
         objectContext.rollback()
     }
     
     public func reset() {
         objectContext.reset()
-    }
-    
-    public func hasChanges() -> Bool {
-        return objectContext.hasChanges
     }
     
     public func performBlock(block: () -> Void) {
@@ -124,7 +125,7 @@ public class CoreDataContext: NSObject {
         return managedObjectId;
     }
     
-    private func createFetchRequestForEntity(entityName : String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, page: Int?, pageSize: Int?) -> NSFetchRequest {
+    private func createFetchRequest(forEntityName entityName : String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) -> NSFetchRequest {
         let request = NSFetchRequest()
         request.sortDescriptors = sortDescriptors
         request.predicate = predicate
