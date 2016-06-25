@@ -19,21 +19,17 @@ One option is creating an asyncronous data access layer and behind this layer yo
 
 // without subclassing NSManagedObject
 
-class ManagedObjectDAO: CoreDataDAO<NSManagedObject> {
-}
-
-let managedObject = try dao.insert(entityName: "Car", map: ["name": "Mercedes"])
-let cars = try dao.findObjectsByEntity("Car", withSortKey: "name")
-try self.dao.delete(object: managedObject)
+let dao = CoreDataGenericDAO<NSManagedObject>(usingContext: context, forEntityName: "Car")
+let managedObject = try dao.insert(withMap: ["name": "Mercedes"])
+let cars = try dao.find()
+try self.dao.delete(managedObject: managedObject)
 
 // subclassing NSManagedObject
 
-class ManagedObjectDAO: CoreDataDAO<Car> {
-}
-
-let car: Car = try self.dao.insert(map: ["name": "Mercedes"])
-let cars = try dao.findObjectsByEntity(sortKey: "name")
-try self.dao.delete(object: car)
+let dao = CoreDataGenericDAO<Car>(usingContext: context, forEntityName: "Car")
+let car: Car = try self.dao.insert(withMap: ["name": "Mercedes"])
+let cars = try dao.find()
+try self.dao.delete(managedObject: car)
 
 ```
 
@@ -47,7 +43,7 @@ At this point this is very similar of writing the server side module of your app
 class Service {
     func addCarWithName(name: String, success: (car: CarDTO) -> Void, failure: (error: NSError) -> Void) {
         do {
-        	let newCar = try self.dao.insert(entityName: "Car", map: ["name": name])
+        	let newCar = try self.dao.insert(withMap: ["name": name])
             success(car: CarDTO(fromManagedObject(newCar)))
         } catch let error as NSError {
             failure(error: error)
