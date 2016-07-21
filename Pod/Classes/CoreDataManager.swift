@@ -63,7 +63,7 @@ public class CoreDataManager: NSObject {
         if let bundle = bundle {
             self.bundle = bundle
         } else {
-            self.bundle = Bundle.main()
+            self.bundle = Bundle.main
         }
         super.init()
     }
@@ -74,16 +74,16 @@ public class CoreDataManager: NSObject {
         } else {
             self.persistentStoreCoordinator = try self.createPersistentStoreCoordinator()
         }
-        NotificationCenter.default().addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default().addObserver(self, selector:
+        NotificationCenter.default.addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default.addObserver(self, selector:
             #selector(persistentStoreCoordinatorStoresWillChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default().addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
+        NotificationCenter.default.addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
     }
     
     public func shutdownCoreDataStack() throws {
-        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
         if let store = self.persistentStoreCoordinator?.persistentStores.first {
             try self.persistentStoreCoordinator?.remove(store)
         }
@@ -128,7 +128,7 @@ public class CoreDataManager: NSObject {
     }
     
     private func applicationDocumentDirectory() -> URL? {
-        let fileManager = FileManager.default()
+        let fileManager = FileManager.default
         if let actualAppGroup = self.appGroup {
             return fileManager.containerURLForSecurityApplicationGroupIdentifier(actualAppGroup)
         }

@@ -52,13 +52,13 @@ public class CoreDataContext: NSObject {
         objectContext.persistentStoreCoordinator = storeCoordinator
         super.init()
         
-        NotificationCenter.default().addObserver(self, selector: #selector(objectsDidChangeNotification), name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
-        NotificationCenter.default().addObserver(self, selector: #selector(objectContextDidSaveNotification), name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(objectsDidChangeNotification), name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
+        NotificationCenter.default.addObserver(self, selector: #selector(objectContextDidSaveNotification), name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
     }
     
     deinit {
-        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
-        NotificationCenter.default().removeObserver(self, name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSManagedObjectContextObjectsDidChange, object: objectContext)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
     }
     
     public func objectContextDidSaveNotification(_ notification: Notification) {
