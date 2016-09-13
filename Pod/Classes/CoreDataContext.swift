@@ -73,14 +73,13 @@ public class CoreDataContext: NSObject {
         return try objectContext.existingObject(with: objectId)
     }
     
-    public func find(entityName: String, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [AnyObject] {
+    public func find(entityName: String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [AnyObject] {
         let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
         return try objectContext.fetch(request)
     }
         
-    public func count(rowsForEntityName entityName: String, predicate: Predicate?) throws -> Int {
+    public func count(rowsForEntityName entityName: String, predicate: NSPredicate?) throws -> Int {
         let request = self.createFetchRequest(forEntityName: entityName, predicate: predicate)
-        var error: NSError?
         return try objectContext.count(for: request)
     }
         
@@ -109,23 +108,23 @@ public class CoreDataContext: NSObject {
         objectContext.reset()
     }
     
-    public func performBlock(_ block: () -> Void) {
+    public func performBlock(_ block: @escaping () -> Void) {
         objectContext.perform(block)
     }
     
     public func managedObjectIdFromStringObjectId(_ objectId: String) throws -> NSManagedObjectID {
-        guard let url = URL(string: objectId), managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectID(forURIRepresentation: url) else {
+        guard let url = URL(string: objectId), let managedObjectId = self.objectContext.persistentStoreCoordinator?.managedObjectID(forURIRepresentation: url) else {
             throw CoreDataKitError.managedObjectIdNotFound
         }
         return managedObjectId;
     }
     
-    private func createFetchRequest(forEntityName entityName : String, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) -> NSFetchRequest<NSManagedObject> {
+    private func createFetchRequest(forEntityName entityName : String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) -> NSFetchRequest<NSManagedObject> {
         let request = NSFetchRequest<NSManagedObject>()
         request.sortDescriptors = sortDescriptors
         request.predicate = predicate
         request.entity = NSEntityDescription.entity(forEntityName: entityName, in: self.objectContext)
-        if let page = page, pageSize = pageSize {
+        if let page = page, let pageSize = pageSize {
             request.fetchLimit = pageSize;
             request.fetchOffset = page * pageSize
         }

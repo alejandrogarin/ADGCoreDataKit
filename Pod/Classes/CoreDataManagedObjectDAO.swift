@@ -31,17 +31,6 @@ import CoreData
 
 public class CoreDataManagedObjectDAO: CoreDataBaseDAO {
     
-    public func insert(withMap map: [String : AnyObject]) throws -> NSManagedObject {
-        let managedObject = self.coreDataContext.insert(withEntityName: entityName)
-        for key in map.keys {
-            if let value = map[key] {
-                managedObject.setValue(value, forKey: key)
-            }
-        }
-        try self.saveIfAutocommit()
-        return managedObject
-    }
-    
     private func managedObjectArray(fromGenericArray list: [AnyObject]) -> [NSManagedObject] {
         var newArray : [NSManagedObject] = []
         for anyObject in list {
@@ -57,7 +46,7 @@ public class CoreDataManagedObjectDAO: CoreDataBaseDAO {
         return self.managedObjectArray(fromGenericArray: list)
     }
     
-    public func find(withPredicate predicate: Predicate?, sortDescriptors: [SortDescriptor]?) throws -> [NSManagedObject] {
+    public func find(withPredicate predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?) throws -> [NSManagedObject] {
         let list: [AnyObject] = try self.coreDataContext.find(entityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: nil, pageSize: nil)
         return self.managedObjectArray(fromGenericArray: list)
     }

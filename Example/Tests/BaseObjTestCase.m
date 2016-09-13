@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "ADGCoreDataKit-swift.h"
+#import "ADGCoreDataKit_Tests-swift.h"
 
 @interface BaseObjTestCase : XCTestCase
 @property (strong, nonatomic) CoreDataManager *coreDataManager;
@@ -18,7 +19,7 @@
 
 - (void)setUp {
     [super setUp];
-    self.coreDataManager = [[CoreDataManager alloc] initUsingModelName:@"TestModel" sqlFileName:nil inBundle:[NSBundle bundleForClass:[self class]] securityApplicationGroup:nil enableCloud:NO useInMemoryStore:YES];
+    self.coreDataManager = [[CoreDataManager alloc] initUsingModelName:@"TestModel" sqlFileName:nil inBundle:[NSBundle bundleForClass:[self class]] securityApplicationGroup:nil useInMemoryStore:YES];
     
     NSError *error = nil;
     BOOL result = [self.coreDataManager setupCoreDataStackAndReturnError:&error];
@@ -37,13 +38,18 @@
 
 - (void)testInsert {
     NSError *error = nil;
-    NSManagedObject *playlist = [self.playlistDAO insertWithMap:@{@"name": @"playlist"} error:&error];
-    XCTAssertNotNil(playlist);
+    Playlist *playlist = (Playlist *)[self.playlistDAO create];
+    playlist.name = @"playlist";
+    BOOL result = [self.playlistDAO commitAndReturnError:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
 }
 
 - (void)testFind {
     NSError *error = nil;
-    [self.playlistDAO insertWithMap:@{@"name": @"playlist"} error:&error];
+    Playlist *playlist = (Playlist *)[self.playlistDAO create];
+    playlist.name = @"playlist";
+    [self.playlistDAO commitAndReturnError:&error];
     NSArray *result = [self.playlistDAO findAndReturnError:&error];
     XCTAssertEqual(result.count, 1);
 }

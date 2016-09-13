@@ -18,8 +18,13 @@ class ViewController: UITableViewController {
         self.dao = CoreDataGenericDAO<TableA>(usingContext: context, forEntityName: "TableA")
         
         for i in 0..<10 {
-            let _ =  try! self.dao.insert(withMap: ["ta_field1":"value \(i)", "ta_field2":i])
+            if let tableObject = self.dao.create() as? TableA {
+                tableObject.ta_field1 = "value \(i)"
+                tableObject.ta_field2 = NSNumber(value: i)
+            }
         }
+        
+        try! self.dao.commit()
 
         self.datasource = try! self.dao.find()
         

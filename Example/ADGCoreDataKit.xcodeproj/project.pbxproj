@@ -22,7 +22,6 @@
 		69B916A21B613BE200E83B74 /* BaseTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B916921B61393A00E83B74 /* BaseTestCase.swift */; };
 		69B916A31B613BE200E83B74 /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B916931B61393A00E83B74 /* ModelTests.swift */; };
 		69B916A41B613BE200E83B74 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B916941B61393A00E83B74 /* Playlist.swift */; };
-		69B916A51B613BE200E83B74 /* RawTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B916951B61393A00E83B74 /* RawTests.swift */; };
 		69B916A61B613BE800E83B74 /* TestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 69B916961B61393A00E83B74 /* TestModel.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -57,7 +56,6 @@
 		69B916921B61393A00E83B74 /* BaseTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseTestCase.swift; sourceTree = "<group>"; };
 		69B916931B61393A00E83B74 /* ModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		69B916941B61393A00E83B74 /* Playlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
-		69B916951B61393A00E83B74 /* RawTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RawTests.swift; sourceTree = "<group>"; };
 		69B916971B61393A00E83B74 /* TestModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TestModel.xcdatamodel; sourceTree = "<group>"; };
 		69B9169F1B613ACF00E83B74 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		8FA16E03D9471513AC858B67 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -101,7 +99,6 @@
 			children = (
 				69B916921B61393A00E83B74 /* BaseTestCase.swift */,
 				69B916931B61393A00E83B74 /* ModelTests.swift */,
-				69B916951B61393A00E83B74 /* RawTests.swift */,
 			);
 			name = Swift;
 			sourceTree = "<group>";
@@ -424,7 +421,6 @@
 				69B916A11B613BE200E83B74 /* Audio.swift in Sources */,
 				69B916A61B613BE800E83B74 /* TestModel.xcdatamodeld in Sources */,
 				69B916A41B613BE200E83B74 /* Playlist.swift in Sources */,
-				69B916A51B613BE200E83B74 /* RawTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

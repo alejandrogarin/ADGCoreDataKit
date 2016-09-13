@@ -65,7 +65,7 @@ class BaseTestCase: XCTestCase {
         }
     }
     
-    func tryTest(_ f: @noescape() throws -> Void) {
+    func tryTest(_ f: () throws -> Void) {
         do {
             try f()
         } catch let error as NSError {
@@ -89,20 +89,24 @@ class BaseTestCase: XCTestCase {
     }
     
     func insertPlaylist(_ name: String?, order: Int?) throws -> Playlist {
-        var map: [String: AnyObject?] = ["name": name]
-        map["order"] = order
-        map["lastplayed"] = nil
-        let playlist: Playlist = try self.playlistDAO.insert(withMap: map)
+        let playlist: Playlist = self.playlistDAO.create() as! Playlist
+        playlist.name = name
+        if let order = order {
+            playlist.order = NSNumber(value: order)
+        }
+        playlist.lastplayed = nil
+        try self.playlistDAO.commit()
         XCTAssertNotNil(playlist)
         return playlist;
     }
     
     func insertAudio(_ title: String, playlist: Playlist?) throws -> Audio {
-        var map: [String: AnyObject] = ["title": title]
+        let audio: Audio =  self.audioDAO.create() as! Audio
+        audio.title = title
         if let playlist = playlist {
-            map["playlist"] = playlist
+            audio.playlist = playlist
         }
-        let audio: Audio = try self.audioDAO.insert(withMap: map)
+        try self.audioDAO.commit()
         XCTAssertNotNil(audio)
         return audio;
     }
@@ -111,7 +115,7 @@ class BaseTestCase: XCTestCase {
         let objectId : NSManagedObjectID = mo.objectID
         let url = objectId.uriRepresentation()
         let absURL = url.absoluteString
-        return absURL!;
+        return absURL;
     }
     
     func managedObjectsToDictionary(_ managedObjects: [NSManagedObject], keys:[String]) -> [[String:Any]] {
@@ -119,7 +123,7 @@ class BaseTestCase: XCTestCase {
         for object in managedObjects {
             var dtoMap: [String: Any] = [:]
             for key in keys {
-                if let value:AnyObject = object.value(forKey: key) {
+                if let value:AnyObject = object.value(forKey: key) as AnyObject? {
                     dtoMap[key] = value
                 }
             }
@@ -143,7 +147,7 @@ class BaseTestCase: XCTestCase {
             var dtoMap: [String: Any] = [:]
             let valuesForKey = object.committedValues(forKeys: nil)
             for key in valuesForKey.keys {
-                if let value:AnyObject = object.value(forKey: key) {
+                if let value:AnyObject = object.value(forKey: key) as AnyObject? {
                     dtoMap[key] = value
                 }
             }

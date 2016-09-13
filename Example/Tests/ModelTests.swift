@@ -40,7 +40,7 @@ class ModelTests: BaseTestCase {
     func testInsertPlaylist() {
         tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            if let name = playlist.name, order = playlist.order {
+            if let name = playlist.name, let order = playlist.order {
                 XCTAssertEqual(name, "play1")
                 XCTAssertEqual(order, 0)
                 try self.playlistDAO.delete(managedObject: playlist)
@@ -65,7 +65,8 @@ class ModelTests: BaseTestCase {
     func testUpdatePlaylist() {
         tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            try self.playlistDAO.update(managedObject: playlist, map: ["name": "updated"])
+            playlist.name = "updated"
+            try self.playlistDAO.commit()
             let array: [Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(array.count, 1)
             let updatedPlaylist:Playlist! = array.first
@@ -76,7 +77,8 @@ class ModelTests: BaseTestCase {
     func testUpdatePlaylist_WithNullInProperty() {
         tryTest {
             let playlist: Playlist = try self.insertPlaylist("play1")
-            try self.playlistDAO.update(managedObject: playlist, map: ["name": nil])
+            playlist.name = nil
+            try self.playlistDAO.commit()
             let array: [Playlist] = try self.playlistDAO.find()
             XCTAssertEqual(array.count, 1)
             let updatedPlaylist:Playlist! = array.first
@@ -84,22 +86,10 @@ class ModelTests: BaseTestCase {
         }
     }
     
-    func testUpdatePlaylist_UsingObjectId() {
-        tryTest {
-            let playlist = try self.insertPlaylist("play1")
-            let objectId = self.stringObjectId(fromMO: playlist)
-            let _ = try self.playlistDAO.update(byId: objectId, map: ["name": "updated"])
-            let array: [Playlist] = try self.playlistDAO.find()
-            XCTAssertEqual(array.count, 1)
-            let updatedPlaylist:Playlist! = array.first
-            XCTAssertEqual(updatedPlaylist.name!, "updated")
-        }
-    }
-    
     func testInsertAudio() {
         tryTest {
             let audio: Audio = try self.insertAudio("audio1", playlist: self.insertPlaylist("p1"))
-            if let title = audio.title, audioPlaylist = audio.playlist {
+            if let title = audio.title, let audioPlaylist = audio.playlist {
                 XCTAssertEqual(title, "audio1")
                 XCTAssertNotNil(audioPlaylist)
             } else {
@@ -169,7 +159,7 @@ class ModelTests: BaseTestCase {
             for i in 0..<100 {
                 let _ = try self.insertPlaylist("play \(i)")
             }
-            let predicate = Predicate(format: "name == %@", "play 1")
+            let predicate = NSPredicate(format: "name == %@", "play 1")
             XCTAssertEqual(try self.playlistDAO.count(withPredicate: predicate), 1)
         }
     }
@@ -196,7 +186,7 @@ class ModelTests: BaseTestCase {
     func testOperationWithManualCommit() {
         tryTest { 
             self.playlistDAO.autocommit = false
-            let _ = try self.insertPlaylist("playlist")
+            let _ = self.playlistDAO.create()
             self.playlistDAO.rollback()
             XCTAssertEqual(try self.playlistDAO.count(), 0)
         }
@@ -219,5 +209,57 @@ class ModelTests: BaseTestCase {
             XCTAssertEqual(result[1].name, "playlist2")
         }
     }
+    
+    func testFindAllPlaylists() {
+        tryTest {
+            for i in 0 ..< 100 {
+                let _ = try self.insertPlaylist("play \(i)", order: i)
+            }
+            let array: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist")
+            XCTAssertEqual(array.count, 100)
+        }
+    }
+    
+    func testFindPlaylistWithPredicate() {
+        tryTest {
+            for i in 0 ..< 100 {
+                let _ = try self.insertPlaylist("play \(i)", order: i)
+            }
+            let predicate = NSPredicate(format: "name CONTAINS %@", "play 2")
+            let array: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: predicate)
+            XCTAssertEqual(array.count, 11)
+        }
+    }
+    
+    func testFindPlaylistWithPaggingAndOrder() {
+        tryTest {
+            for i in 0 ..< 100 {
+                let _ = try self.insertPlaylist("play \(i)", order: i)
+            }
+            
+            let descriptor = [NSSortDescriptor(key: "order", ascending: true)]
+            
+            let arrayPage0: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 0, pageSize: 10)
+            let arrayPage1: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 1, pageSize: 10)
+            let arrayPage9: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 9, pageSize: 10)
+            let arrayPage10: [AnyObject] = try self.coreDataContext.find(entityName: "Playlist", predicate: nil, sortDescriptors: descriptor, page: 10, pageSize: 10)
+            XCTAssertEqual(arrayPage0.count, 10)
+            XCTAssertEqual(arrayPage1.count, 10)
+            XCTAssertEqual(arrayPage9.count, 10)
+            XCTAssertEqual(arrayPage10.count, 0)
+            var object1: NSManagedObject = arrayPage0.first! as! NSManagedObject
+            var object10: NSManagedObject = arrayPage0.last! as! NSManagedObject
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 0")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 9")
+            object1 = arrayPage1.first! as! NSManagedObject
+            object10 = arrayPage1.last! as! NSManagedObject
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 10")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 19")
+            object1 = arrayPage9.first! as! NSManagedObject
+            object10 = arrayPage9.last! as! NSManagedObject
+            XCTAssertEqual((object1.value(forKey: "name") as? String)!, "play 90")
+            XCTAssertEqual((object10.value(forKey: "name") as? String)!, "play 99")
+        }
+    }    
     
 }

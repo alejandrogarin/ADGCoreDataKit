@@ -28,36 +28,26 @@
 
 import CoreData
 
-public enum CoreDataKitError: ErrorProtocol {
+public enum CoreDataKitError: Error {
     case cannotFindObjectModel(name: String, bundle: Bundle)
     case cannotCreateManagedModelObject(path: String)
     case managedObjectIdNotFound
-}
-
-public protocol CoreDataManagerDelegate: class {
-    func coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(_ notification: Notification)
-    func coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(_ transition: NSPersistentStoreUbiquitousTransitionType)
-    func coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(_ transition: NSPersistentStoreUbiquitousTransitionType)
 }
 
 public class CoreDataManager: NSObject {
 
     private var persistentStoreCoordinator : NSPersistentStoreCoordinator?
     
-    public weak var delegate : CoreDataManagerDelegate?
-    
     let modelName : String
-    let icloud : Bool
     let appGroup: String?
     let bundle: Bundle
     let sqlFileName: String?
     let useInMemoryStore: Bool
     var objectModel : NSManagedObjectModel?
     
-    public init(usingModelName modelName: String, sqlFileName: String? = nil, inBundle bundle: Bundle? = nil, securityApplicationGroup appGroup: String? = nil, enableCloud: Bool = false, useInMemoryStore: Bool = false) {
+    public init(usingModelName modelName: String, sqlFileName: String? = nil, inBundle bundle: Bundle? = nil, securityApplicationGroup appGroup: String? = nil, useInMemoryStore: Bool = false) {
         self.modelName = modelName
         self.appGroup = appGroup
-        self.icloud = enableCloud
         self.sqlFileName = sqlFileName
         self.useInMemoryStore = useInMemoryStore
         if let bundle = bundle {
@@ -74,16 +64,9 @@ public class CoreDataManager: NSObject {
         } else {
             self.persistentStoreCoordinator = try self.createPersistentStoreCoordinator()
         }
-        NotificationCenter.default.addObserver(self, selector: #selector(persistentStoreCoordinatorStoresDidChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default.addObserver(self, selector:
-            #selector(persistentStoreCoordinatorStoresWillChangeNotification), name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default.addObserver(self, selector: #selector(persistentStoreDidImportUbiquitousContentChangesNotification), name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
     }
     
     public func shutdownCoreDataStack() throws {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresDidChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreCoordinatorStoresWillChange, object: self.persistentStoreCoordinator)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSPersistentStoreDidImportUbiquitousContentChanges, object: self.persistentStoreCoordinator)
         if let store = self.persistentStoreCoordinator?.persistentStores.first {
             try self.persistentStoreCoordinator?.remove(store)
         }
@@ -97,42 +80,13 @@ public class CoreDataManager: NSObject {
         }
     }
     
-    func persistentStoreCoordinatorStoresDidChangeNotification(_ notification: Notification) {
-        if let userInfo = (notification as NSNotification).userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
-            self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresDidChangeWithTransitionType(enumType)
-        }
-    }
-    
-    func persistentStoreCoordinatorStoresWillChangeNotification(_ notification: Notification) {
-        if let userInfo = (notification as NSNotification).userInfo, type = userInfo[NSPersistentStoreUbiquitousTransitionTypeKey] as? UInt, enumType = self.convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(type) {
-            self.delegate?.coreDataManagerPersistentStoreCoordinatorStoresWillChangeWithTransitionType(enumType)
-        }
-    }
-    
-    func persistentStoreDidImportUbiquitousContentChangesNotification(_ notification: Notification) {
-        self.delegate?.coreDataManagerPersistentStoreDidImportUbiquitousContentChangesNotification(notification)
-    }
-    
-    private func convertNSPersistentStoreUbiquitousTransitionTypeKeyValueToEnum(_ type: UInt) -> NSPersistentStoreUbiquitousTransitionType? {
-        if type == NSPersistentStoreUbiquitousTransitionType.accountAdded.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.accountAdded
-        } else if type == NSPersistentStoreUbiquitousTransitionType.accountRemoved.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.accountRemoved
-        } else if type == NSPersistentStoreUbiquitousTransitionType.contentRemoved.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.contentRemoved
-        } else if type == NSPersistentStoreUbiquitousTransitionType.initialImportCompleted.rawValue {
-            return NSPersistentStoreUbiquitousTransitionType.initialImportCompleted
-        } else {
-            return nil
-        }
-    }
-    
     private func applicationDocumentDirectory() -> URL? {
         let fileManager = FileManager.default
         if let actualAppGroup = self.appGroup {
-            return fileManager.containerURLForSecurityApplicationGroupIdentifier(actualAppGroup)
+            return fileManager.containerURL(forSecurityApplicationGroupIdentifier: actualAppGroup)
         }
-        let urlsForDir = fileManager.urlsForDirectory(FileManager.SearchPathDirectory.documentDirectory, inDomains: FileManager.SearchPathDomainMask.userDomainMask)
+        let urlsForDir = fileManager.urls(for: FileManager.SearchPathDirectory.documentDirectory, in: FileManager.SearchPathDomainMask.userDomainMask)
+            
         return urlsForDir.first
     }
     
@@ -141,12 +95,12 @@ public class CoreDataManager: NSObject {
             return self.objectModel!
         }
         
-        guard let modelURL = self.bundle.urlForResource(self.modelName, withExtension: "momd") else {
+        guard let modelURL = self.bundle.url(forResource: self.modelName, withExtension: "momd") else {
             throw CoreDataKitError.cannotFindObjectModel(name: self.modelName, bundle: self.bundle)
         }
 
         guard let managedObjectModel = NSManagedObjectModel(contentsOf: modelURL) else {
-            throw CoreDataKitError.cannotCreateManagedModelObject(path: modelURL.absoluteString!)
+            throw CoreDataKitError.cannotCreateManagedModelObject(path: modelURL.absoluteString)
         }
         
         return managedObjectModel
@@ -160,20 +114,16 @@ public class CoreDataManager: NSObject {
     }
     
     private func createPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
-        var storeOptions: [NSObject : AnyObject]? = nil
-        if (self.icloud) {
-            storeOptions = [NSPersistentStoreUbiquitousContentNameKey:"container_\(self.modelName)", NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
-        } else {
-            //TODO: allow setting this in a property
-            storeOptions = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
-        }
+        //TODO: allow setting this in a property
+        var storeOptions: [AnyHashable : Any]? = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
 
         var storeFile = self.modelName + ".sqlite"
         if let sqlFileName = self.sqlFileName {
             storeFile = sqlFileName + ".sqlite"
         }
+        
         let documentDirectory: URL? = applicationDocumentDirectory()
-        let storeURL: URL? = try! documentDirectory?.appendingPathComponent(storeFile)
+        let storeURL: URL? = documentDirectory?.appendingPathComponent(storeFile)
 
         self.objectModel = try createManagedObjectModel()
         

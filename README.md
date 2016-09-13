@@ -17,17 +17,10 @@ One option is creating an asyncronous data access layer and behind this layer yo
 
 ```swift
 
-// without subclassing NSManagedObject
-
-let dao = CoreDataGenericDAO<NSManagedObject>(usingContext: context, forEntityName: "Car")
-let managedObject = try dao.insert(withMap: ["name": "Mercedes"])
-let cars = try dao.find()
-try self.dao.delete(managedObject: managedObject)
-
-// subclassing NSManagedObject
-
 let dao = CoreDataGenericDAO<Car>(usingContext: context, forEntityName: "Car")
-let car: Car = try self.dao.insert(withMap: ["name": "Mercedes"])
+let car: Car = self.dao.create() as! Car
+car.name = "Mercedes"
+try dao.commit()
 let cars = try dao.find()
 try self.dao.delete(managedObject: car)
 
@@ -43,7 +36,9 @@ At this point this is very similar of writing the server side module of your app
 class Service {
     func addCarWithName(name: String, success: (car: CarDTO) -> Void, failure: (error: NSError) -> Void) {
         do {
-        	let newCar = try self.dao.insert(withMap: ["name": name])
+        	let newCar = self.dao.create() as! Car
+            newCar.name = name
+            try self.dao.commit()
             success(car: CarDTO(fromManagedObject(newCar)))
         } catch let error as NSError {
             failure(error: error)
@@ -55,8 +50,3 @@ class Service {
 #### Can I use it in my ViewController/s anyway?
 
 Yes!
-
-
-## Content
-
-TODO

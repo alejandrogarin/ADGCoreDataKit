@@ -43,7 +43,7 @@ public class CoreDataGenericDAO<T: NSManagedObject>: CoreDataBaseDAO {
         return try self.fetchManagedObject(byManagedObjectId: objectId) as! T
     }
     
-    public func find(withPredicate predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [T] {
+    public func find(withPredicate predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil) throws -> [T] {
         let list: [AnyObject] = try self.coreDataContext.find(entityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
         var newArray: [T] = []
         for anyObject in list {
@@ -54,36 +54,15 @@ public class CoreDataGenericDAO<T: NSManagedObject>: CoreDataBaseDAO {
         return newArray
     }
     
-    public func findTransformed<DTO>(withPredicate predicate: Predicate? = nil, sortDescriptors: [SortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil, transformationHandler:(entity: T) -> DTO) throws -> [DTO] {
+    public func findTransformed<DTO>(withPredicate predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil, page: Int? = nil, pageSize: Int? = nil, transformationHandler:(T) -> DTO) throws -> [DTO] {
         let list: [AnyObject] = try self.coreDataContext.find(entityName: entityName, predicate: predicate, sortDescriptors: sortDescriptors, page: page, pageSize: pageSize)
         var newArray: [DTO] = []
         for anyObject in list {
             if let anyObject = anyObject as? T {
-                let transformedObject = transformationHandler(entity: anyObject)
+                let transformedObject = transformationHandler(anyObject)
                 newArray.append(transformedObject)
             }
         }
         return newArray
-    }
-    
-    public func insert(withMap map: [String:AnyObject?]) throws -> T {
-        let managedObject = self.coreDataContext.insert(withEntityName: entityName)
-        for key in map.keys {
-            if let value = map[key] {
-                managedObject.setValue(value, forKey: key)
-            }
-        }
-        try self.saveIfAutocommit()
-        return managedObject as! T
-    }
-    
-    public func update(byId objectId: String, map: [String:AnyObject?]) throws -> T {
-        let managedObject = try self.fetchManagedObject(byId: objectId)
-        for key in map.keys {
-            let maybeValue: AnyObject? = map[key]!
-            managedObject.setValue(maybeValue, forKey: key)
-        }
-        try self.saveIfAutocommit()
-        return managedObject as! T
     }
 }
