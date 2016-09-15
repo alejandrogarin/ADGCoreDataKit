@@ -1,14 +1,6 @@
-//
-//  BaseObjTestCase.m
-//  ADGCoreDataKit
-//
-//  Created by Alejandro Garin on 6/23/16.
-//  Copyright © 2016 CocoaPods. All rights reserved.
-//
-
 #import <XCTest/XCTest.h>
-#import "ADGCoreDataKit-swift.h"
-#import "ADGCoreDataKit_Tests-swift.h"
+//#import "ADGCoreDataKit-swift.h"
+#import "ADGCoreDataKitTests-swift.h"
 
 @interface BaseObjTestCase : XCTestCase
 @property (strong, nonatomic) CoreDataManager *coreDataManager;

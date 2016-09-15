@@ -115,7 +115,7 @@ public class CoreDataManager: NSObject {
     
     private func createPersistentStoreCoordinator() throws -> NSPersistentStoreCoordinator {
         //TODO: allow setting this in a property
-        var storeOptions: [AnyHashable : Any]? = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
+        let storeOptions: [AnyHashable : Any]? = [NSMigratePersistentStoresAutomaticallyOption:true, NSInferMappingModelAutomaticallyOption:true]
 
         var storeFile = self.modelName + ".sqlite"
         if let sqlFileName = self.sqlFileName {

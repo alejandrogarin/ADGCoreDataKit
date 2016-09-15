@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "106001921D53CD0C001A15CC"
+               BlueprintIdentifier = "104536DD1D8B0FCE00AC3214"
                BuildableName = "ADGCoreDataKit.framework"
                BlueprintName = "ADGCoreDataKit"
                ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
@@ -28,7 +28,26 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "104536E61D8B0FCE00AC3214"
+               BuildableName = "ADGCoreDataKitTests.xctest"
+               BlueprintName = "ADGCoreDataKitTests"
+               ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "104536DD1D8B0FCE00AC3214"
+            BuildableName = "ADGCoreDataKit.framework"
+            BlueprintName = "ADGCoreDataKit"
+            ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -45,7 +64,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "106001921D53CD0C001A15CC"
+            BlueprintIdentifier = "104536DD1D8B0FCE00AC3214"
             BuildableName = "ADGCoreDataKit.framework"
             BlueprintName = "ADGCoreDataKit"
             ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">
@@ -63,7 +82,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "106001921D53CD0C001A15CC"
+            BlueprintIdentifier = "104536DD1D8B0FCE00AC3214"
             BuildableName = "ADGCoreDataKit.framework"
             BlueprintName = "ADGCoreDataKit"
             ReferencedContainer = "container:ADGCoreDataKit.xcodeproj">

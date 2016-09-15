@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "ADGCoreDataKit"
-  s.version          = "0.1.0"
+  s.version          = "0.3"
   s.summary          = "Apple CoreData made easy."
   s.description      = <<-DESC
                        An interface to Apple Core Data
@@ -21,13 +21,13 @@ Pod::Spec.new do |s|
   s.source           = { :git => "https://github.com/alejandrogarin/ADGCoreDataKit.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/alejandrogarin'
 
-  s.platform     = :ios, '8.0'
+  s.platform     = :ios, '9.3'
   s.requires_arc = true
 
-  s.source_files = 'Pod/Classes/**/*'
-  s.resource_bundles = {
-    'ADGCoreDataKit' => ['Pod/Assets/*.png']
-  }
+  s.source_files = 'Source/**/*'
+  #s.resource_bundles = {
+  #  'ADGCoreDataKit' => ['Pod/Assets/*.png']
+  #}
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'CoreData'

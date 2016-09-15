@@ -2,7 +2,7 @@
 //  ADGCoreDataKit.h
 //  ADGCoreDataKit
 //
-//  Created by Alejandro Garin on 04/08/2016.
+//  Created by Alejandro Garin on 15/09/2016.
 //  Copyright © 2016 Alejandro Garin. All rights reserved.
 //
 
